@@ -1,0 +1,256 @@
+Create a complete beginner-friendly 3D anime-style tower defense game using JavaScript and Three.js that runs in a browser (Replit compatible).
+
+This game must include a full lobby system, unit inventory, summoning (gacha), evolutions, boss fights, multiple modes, anime-style abilities, and ORIGINAL anime-inspired characters (not based on or copied from any existing anime).
+
+---
+
+## ANIME-STYLE UNIT DESIGN RULE
+
+All characters must feel like they belong in a high-energy anime world:
+
+* Dramatic names
+* Elemental or supernatural powers
+* Strong visual identity (glowing effects, aura colors, energy types)
+* Clear role types (tank, assassin, mage, support, sniper)
+
+---
+
+## COMMON CHARACTERS
+
+1. Kai Blade (Swift Swordsman)
+
+* A young fighter with a glowing energy sword
+* Aura: Blue energy trails
+* Ability: Swift Slash (fast multi-hit combo)
+
+2. Mira Shieldheart (Guardian Knight)
+
+* Armored protector with a light-forged shield
+* Aura: Golden defensive barrier
+* Ability: Barrier Dome (temporary damage immunity zone)
+
+3. Ren Flashstep (Speed Fighter)
+
+* Ninja-style fighter with blurred movement
+* Aura: White speed streaks
+* Ability: Phantom Dash (teleport strike chain)
+
+---
+
+## RARE CHARACTERS
+
+1. Akira Emberstorm (Fire Manipulator)
+
+* Controls explosive fire energy
+* Aura: Red/orange flame core
+* Ability: Inferno Burst (AOE fire explosion)
+
+2. Sora Vantage (Precision Archer)
+
+* Calm ranged fighter with energy bow
+* Aura: Cyan targeting glow
+* Ability: Piercing Light Shot (high crit damage)
+
+3. Ryu Voltclash (Lightning Warrior)
+
+* Electric-based melee fighter
+* Aura: Purple lightning arcs
+* Ability: Thunder Chain (multi-target electric strike)
+
+---
+
+## EPIC CHARACTERS
+
+1. Kage Nullshade (Shadow Assassin)
+
+* Stealth-based teleport assassin
+* Aura: Dark smoke shadows
+* Ability: Void Step (teleport + critical burst)
+
+2. Hikari Radiance (Light Support Mage)
+
+* Healing and buffing character
+* Aura: Bright white healing glow
+* Ability: Radiant Pulse (buff + heal nearby units)
+
+3. Tetsu Ironcore (Heavy Vanguard)
+
+* Massive armored frontline unit
+* Aura: Metallic energy field
+* Ability: Fortress Mode (damage reduction + taunt)
+
+---
+
+## LEGENDARY CHARACTERS
+
+1. Drakon Pyroclast (Dragon Flame Warrior)
+
+* Dragon-powered energy fighter
+* Aura: Burning dragon wings
+* Ability: Dragon Nova (huge AOE explosion)
+
+2. Chrona Eclipse (Time Manipulator)
+
+* Controls time distortion fields
+* Aura: Clock-like floating particles
+* Ability: Temporal Freeze (slows all enemies globally)
+
+3. Astra Celestia (Cosmic Entity Warrior)
+
+* Celestial space-powered fighter
+* Aura: Starfield particles
+* Ability: Supernova Collapse (screen-wide damage blast)
+
+---
+
+## EVOLUTION SYSTEM
+
+Each character evolves twice:
+
+Example:
+Kai Blade →
+
+* Kai Ascended Blade →
+
+  * Kai Infinity Blade
+
+Akira Emberstorm →
+
+* Akira Infernal Form →
+
+  * Akira Phoenix Emperor
+
+Drakon Pyroclast →
+
+* Drakon Awakened →
+
+  * Drakon Eternal Sovereign
+
+Evolution Features:
+
+* Increased stats
+* New aura effects (stronger glow, particles, trails)
+* Ability upgrades or new abilities
+* Size/visual transformation
+
+---
+
+## GACHA SYSTEM (SUMMONING)
+
+Currencies:
+
+* Coins (standard summons)
+* Gems (rare summons)
+
+Drop Rates:
+
+* Common: 60%
+* Rare: 25%
+* Epic: 10%
+* Legendary: 5%
+
+Summon System:
+
+* Animated summon reveal screen
+* Rarity-based lighting effects
+* Character “materialization” animation
+
+Duplicates:
+
+* Converted into upgrade shards/materials
+
+---
+
+## BOSS SYSTEM
+
+Boss characters should feel massive and cinematic:
+
+1. Goliath Prime Titan
+
+* Giant armored machine boss
+* Ability: Shockwave Slam
+
+2. Nyx Void Empress
+
+* Dark energy boss controlling shadows
+* Ability: Abyss Storm
+
+3. Infernal Beast King Rex
+
+* Lava dragon-like creature
+* Ability: Volcano Eruption
+
+Boss Features:
+
+* Huge scale models
+* Special boss health bar UI
+* Phase changes at low HP
+* Unique attack patterns
+
+---
+
+## ANIME ABILITY SYSTEM
+
+Each unit has a special ability:
+
+* Cooldown-based
+* High visual impact
+* Energy effects (light, fire, lightning, shadow, cosmic)
+
+Examples of effects:
+
+* Expanding energy rings
+* Screen flashes
+* Particle bursts
+* Aura activation states
+
+---
+
+## LOBBY SYSTEM (FULL FEATURED)
+
+Lobby includes:
+
+* Player profile (level, XP, currency)
+* Navigation menu:
+
+  * Play
+  * Units (inventory)
+  * Summon
+  * Shop
+  * Modes
+  * Settings
+
+Inventory:
+
+* Equip up to 5 units
+* View stats and evolution paths
+* Upgrade units
+
+Modes:
+
+* Story Mode (progressive levels + bosses)
+* Infinite Mode (endless scaling waves)
+* Challenge Mode (special modifiers)
+
+---
+
+## GOAL
+
+Build a fully playable anime-style 3D tower defense game with:
+
+* Original anime-inspired character roster
+* Gacha summoning system
+* Evolution system
+* Boss battles with phases
+* Full lobby + inventory + shop
+* Multiple gameplay modes
+* Special anime-style abilities
+
+Code must be:
+
+* Beginner-friendly
+* Fully commented
+* Fully runnable in Replit
+* Structured cleanly for expansion
+
+Explain how to run the project at the end.
