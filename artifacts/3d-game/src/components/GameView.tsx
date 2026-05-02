@@ -420,7 +420,7 @@ function CameraSetup() {
   useEffect(() => {
     camera.position.set(0, 14, 10);
     camera.lookAt(0, 0, 0);
-    camera.fov = 55;
+    (camera as THREE.PerspectiveCamera).fov = 55;
     (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
   }, [camera]);
   return null;

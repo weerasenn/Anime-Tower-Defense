@@ -2,7 +2,7 @@
 // APP — Main router between lobby, summon, inventory, game
 // ============================================================
 
-import Lobby from './components/Lobby';
+import Lobby3D from './components/Lobby3D';
 import Summon from './components/Summon';
 import Inventory from './components/Inventory';
 import Shop from './components/Shop';
@@ -15,7 +15,7 @@ export default function App() {
 
   return (
     <div className="app-root">
-      {screen === 'lobby' && <Lobby />}
+      {screen === 'lobby' && <Lobby3D />}
       {screen === 'summon' && <Summon />}
       {screen === 'inventory' && <Inventory />}
       {screen === 'shop' && <Shop />}

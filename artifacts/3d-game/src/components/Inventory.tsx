@@ -7,7 +7,7 @@ import { useGameStore } from '../store/gameStore';
 import { UNITS, RARITY_COLORS, UnitData } from '../data/units';
 
 type SortMode = 'rarity' | 'name' | 'level';
-type FilterRarity = 'all' | 'common' | 'rare' | 'epic' | 'legendary';
+type FilterRarity = 'all' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'secret';
 
 export default function Inventory() {
   const { ownedUnits, equippedUnitIds, equipUnit, unequipUnit, upgradeUnit, evolveUnit, setScreen, profile } = useGameStore();
@@ -15,7 +15,7 @@ export default function Inventory() {
   const [sort, setSort] = useState<SortMode>('rarity');
   const [filter, setFilter] = useState<FilterRarity>('all');
 
-  const rarityOrder = { legendary: 0, epic: 1, rare: 2, common: 3 };
+  const rarityOrder: Record<string, number> = { secret: 0, mythic: 1, legendary: 2, epic: 3, rare: 4 };
 
   const sortedOwned = [...ownedUnits]
     .filter(u => {
@@ -107,7 +107,7 @@ export default function Inventory() {
         <div className="inventory-list-panel">
           {/* Filters */}
           <div className="filter-row">
-            {(['all', 'common', 'rare', 'epic', 'legendary'] as FilterRarity[]).map(r => (
+            {(['all', 'rare', 'epic', 'legendary', 'mythic', 'secret'] as FilterRarity[]).map(r => (
               <button
                 key={r}
                 className={`filter-btn ${filter === r ? 'active' : ''}`}

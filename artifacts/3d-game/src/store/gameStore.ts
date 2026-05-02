@@ -368,7 +368,7 @@ export const useGameStore = create<GameStoreState>()(
 
       // ------- Summon -------
       summonUnit: (type) => {
-        const { spendCoins, spendGems, addUnit } = get();
+        const { spendCoins, spendGems, addUnit, profile } = get();
         let count = 1;
         let success = false;
 
@@ -379,12 +379,20 @@ export const useGameStore = create<GameStoreState>()(
         if (!success) return false;
 
         const results: UnitData[] = [];
+        let pity = (profile as any).summonPity ?? 0;
+
         for (let i = 0; i < count; i++) {
-          const pulled = performSummon();
+          pity++;
+          const forceMythic = pity >= 250;
+          const pulled = performSummon(forceMythic);
+          if (pulled.rarity === 'mythic' || pulled.rarity === 'secret') {
+            pity = 0;
+          }
           results.push(pulled);
           addUnit(pulled);
         }
-        set({ revealQueue: results });
+
+        set(s => ({ revealQueue: results, profile: { ...s.profile, summonPity: pity } as any }));
         return true;
       },
 

@@ -1,0 +1,56 @@
+The Summon NPC (Naruto Six Paths)
+• Identity: Naruto Uzumaki in Six Paths Sage Mode.
+• Location: The Summoning Altar/Temple (North side of lobby).
+• Visuals:
+• Aura: Glows with a yellow/orange Chakra Cloak (emissive material).
+• Accessories: 9 Truth-Seeker Orbs floating in a ring behind him.
+• Weapon: Holds a black Shakujo Staff.
+• Movement: Floats up and down on his altar.
+• Function: Walking near him triggers the "Interact" button to open the Gacha Menu.
+3. The Secret Unit: Yhwach (The Almighty Father)
+• Rarity: Secret (Rainbow) - 0.05% Chance (1 in 2,000).
+• Model Features (High Fidelity):
+• Poly Count: 15k-20k triangles (Higher than other units).
+• Eyes: Multi-pupil system ("The Almighty") using UV scroll shaders to look like they are multiplying/swimming. Cold, bored expression with half-mast eyelids.
+• Facial Hair: Jagged black mustache and hair modeled as separate alpha-masked planes.
+• Garments:
+• Coat: Heavy double-breasted white trench coat with Sub-Surface Scattering (SSS) for a premium look.
+• Cape: Massive black cloak with a "Space/Nebula" texture on the interior.
+• Sword: Massive broadsword with a gold hilt (Metalness Map).
+• Animations & Effects:
+• Idle: He sits on a Reishi Throne (crystalline blue energy) instead of standing.
+• The Future Sight: Raises hand, inverting screen colors (negative filter).
+• Aura: "Rainbow-Darkness" particle system (black smoke with rainbow edges).
+• Pull Event: When summoned, the entire server screen turns dark/inverts, and a global message appears: "[Player] has awakened THE ALMIGHTY."
+• Voice Line: "Everything in this world exists for my sake."
+4. Other Units (Hero Data Table)
+You provided specific visual and animation details for the entire roster, organized by rarity:
+Rare (Blue) - 80%
+• The Orange Outcast (Naruto): Blue eyes, whiskers, orange jumpsuit. Idle: Rocking on heels, punching palm with smoke puff.
+• The Green Trainee (Tanjiro): Scar on forehead, checkered haori. Idle: "Total Concentration" breathing with steam particles.
+• The Rubber Captain (Luffy): Straw hat, red vest, big smile. Idle: Stretches neck to scan horizon.
+Epic (Purple) - 15%
+• The Reaper Commander (Ichigo): Spiky orange hair, big sword on back. Idle: Purple "Spirit Pressure" flicker when touching sword.
+• The Prideful Warrior (Vegeta): Scowl, widow's peak, blue suit/armor. Idle: Powers up with purple electricity.
+• The Blindfolded Sensei (Gojo): Blindfold, white hair, playful smirk. Idle: Floats cross-legged with a spinning "Hollow" orb (distortion effect).
+Legendary (Gold) - 4.45%
+• The Arisen King (Sung Jin-Woo): Glowing blue eyes, trench coat, shadow soldiers rise from ground.
+• The Golden Tyrant (Gilgamesh): Gold armor (reflective), crimson eyes. Idle: Golden ripples (Gate of Babylon) open behind him.
+• The Crimson Alchemist (Alucard): Red coat/hat, orange glasses, scary grin. Idle: Dissolves into shadows/eyes and reforms.
+Mythic (Red) - 0.5%
+• The Hollow Mask (Vasto Lorde Ichigo): Bone mask with horns, hole in chest. Idle: Hunches over and releases red shockwave (screen shake).
+• The God of Curses (Sukuna): Four eyes, tattoos, kimono. Idle: Sits on a "Throne of Skulls" with red domain aura.
+• The Solar Warrior (Gear 5 Luffy): White hair/clothes made of cloud matter, glowing white. Idle: Bounces like a rubber ball, grabs air.
+Secret (Rainbow) - 0.05%
+• The Almighty Father (Yhwach): (Detailed above).
+• The Universe Destroyer (Beerus): Purple cat, Egyptian collar. Idle: Taps "Hakai" orb that erases floor grid.
+• The Infinite Rival (Sasuke): Rinnegan eye, purple Susanoo ribcage protects him.
+5. Game Mechanics & UI
+• Lobby: 3D "Vanguard Hall" with a lighter/white background.
+• Buildings: Summon Temple (North), Evolution Dojo (East), Raid Tower (West).
+• Gacha System:
+• Banners: Rotate hourly (2 Mythics, 2 Secrets per rotation).
+• Pity: Mythic Pity at 250 summons.
+• Summon x10: Reveals units in a grid; secret pulls trigger special headers and effects.
+• Index: A UI to view all units in rarity order.
+• Controls: Mobile-optimized virtual joystick (bottom left) and interaction buttons.

@@ -187,10 +187,11 @@ function SummonReveal({ unit, rColor, index, total, isLast, onNext, onRevealAll 
   }, [unit.id, index]);
 
   const rarityLabels: Record<string, string> = {
-    common: '★ COMMON',
     rare: '★★ RARE',
     epic: '★★★ EPIC',
     legendary: '★★★★ LEGENDARY',
+    mythic: '★★★★★ MYTHIC',
+    secret: '🌈 SECRET',
   };
 
   return (
@@ -198,12 +199,15 @@ function SummonReveal({ unit, rColor, index, total, isLast, onNext, onRevealAll 
       <div className="reveal-bg" style={{ background: `radial-gradient(circle at center, ${rColor}22 0%, #000 70%)` }} />
 
       {/* Rarity flare */}
-      {unit.rarity === 'legendary' && (
+      {(unit.rarity === 'legendary' || unit.rarity === 'mythic' || unit.rarity === 'secret') && (
         <div className="legendary-flare">
           {'★'.repeat(8).split('').map((s, i) => (
-            <div key={i} className="flare-star" style={{ animationDelay: `${i * 0.1}s`, transform: `rotate(${i * 45}deg) translateY(-80px)` }}>{s}</div>
+            <div key={i} className="flare-star" style={{ animationDelay: `${i * 0.1}s`, transform: `rotate(${i * 45}deg) translateY(-80px)`, color: unit.rarity === 'secret' ? '#E879F9' : unit.rarity === 'mythic' ? '#EF4444' : '#F59E0B' }}>{s}</div>
           ))}
         </div>
+      )}
+      {unit.rarity === 'secret' && (
+        <div className="secret-flash" />
       )}
 
       <div className={`reveal-card ${visible ? 'reveal-card-visible' : ''}`} style={{ borderColor: rColor, boxShadow: `0 0 40px ${rColor}66` }}>
