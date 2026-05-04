@@ -30,11 +30,12 @@ artifacts/3d-game/
 │       ├── Modes.tsx            # Story / Infinite / Challenge mode select
 │       ├── GameView.tsx         # 3D tower defense battlefield (R3F)
 │       └── GameUI.tsx           # In-game HUD overlay
+│       └── CharacterModel.tsx    # Shared improved character body (used in reveal canvas)
 ```
 
 ## 3D Lobby — Vanguard Hall
 - Full 3D walkable scene (React Three Fiber Canvas)
-- **Player**: Capsule character, WASD/Arrow Keys on desktop, virtual joystick on mobile
+- **Player**: LeBron James character (Lakers purple #552583 + gold #FDB927), tall humanoid with bald head, beard, walking leg/arm animation driven by movement detection. WASD/Arrow Keys on desktop, virtual joystick on mobile
 - **Third-person camera**: Follows player with lerp smoothing
 - **Proximity detection**: Walk within 4.5 units of an NPC → [E] Interact button appears
 
@@ -51,8 +52,10 @@ artifacts/3d-game/
 - Blue glowing floor path strips
 - Central purple portal orb at Summon Temple
 - Decorative plants in alcoves
-- Point lights colored purple, blue, gold, red
-- Fog for depth
+- Point lights at 4–7 intensity (much brighter than before), colored purple, blue, gold, red, cyan
+- Ambient light increased to 1.1 + hemisphere at 1.3 for bright, readable environment
+- Fog pulled back to z=38–70 for better visibility
+- Camera angle lowered (player+5.5 height, +9 depth) for closer 3rd-person follow
 
 ## Unit Roster (15 Characters × 3 Stages = 45 Total)
 ### Rarities & Rates

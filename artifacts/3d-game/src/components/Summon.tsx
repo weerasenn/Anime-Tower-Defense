@@ -2,9 +2,12 @@
 // SUMMON — Gacha summoning screen with reveal animation
 // ============================================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 import { useGameStore } from '../store/gameStore';
 import { UnitData, GACHA_RATES, RARITY_COLORS, UNITS } from '../data/units';
+import { CharacterBody } from './CharacterModel';
 
 export default function Summon() {
   const { profile, setScreen, summonUnit, revealQueue, clearRevealQueue, testSummonSecret } = useGameStore();
@@ -12,12 +15,14 @@ export default function Summon() {
   const [showReveal, setShowReveal] = useState(false);
   const [revealedUnits, setRevealedUnits] = useState<UnitData[]>([]);
   const [revealIndex, setRevealIndex] = useState(0);
+  const [revealKey, setRevealKey] = useState(0);
 
   // When revealQueue is populated, show reveal screen
   useEffect(() => {
     if (revealQueue.length > 0 && !showReveal) {
       setRevealedUnits(revealQueue);
       setRevealIndex(0);
+      setRevealKey(k => k + 1);
       setShowReveal(true);
       setIsAnimating(false);
     }
@@ -55,6 +60,7 @@ export default function Summon() {
     const isLast = revealIndex === revealedUnits.length - 1;
     return (
       <SummonReveal
+        key={revealKey}
         unit={current}
         rColor={rColor}
         index={revealIndex}
@@ -149,6 +155,17 @@ export default function Summon() {
         <div className="currency-badge gems">💎 {profile.gems.toLocaleString()}</div>
       </div>
 
+      {/* Pity counter */}
+      <div className="summon-pity">
+        <span>Pity: <strong>{(profile as any).summonPity ?? 0}</strong> / 250</span>
+        {((profile as any).summonPity ?? 0) >= 220 && (
+          <span className="pity-warning">⚡ Mythic soon!</span>
+        )}
+        {((profile as any).summonPity ?? 0) >= 240 && (
+          <span className="pity-critical">🌈 SECRET incoming!</span>
+        )}
+      </div>
+
       {/* Recent pool preview */}
       <div className="pool-preview">
         <div className="pool-title">CHARACTER POOL</div>
@@ -165,6 +182,27 @@ export default function Summon() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ── 3D spinning character preview for reveal card ──────────
+function SpinningModel({ unit, rColor }: { unit: UnitData; rColor: string }) {
+  const groupRef = useRef<THREE.Group>(null!);
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 1.4;
+    }
+  });
+  return (
+    <>
+      <ambientLight intensity={3.5} />
+      <pointLight position={[2, 4, 3]} intensity={6} color={rColor} />
+      <pointLight position={[-2, 2, 2]} intensity={3} color="#ffffff" />
+      <pointLight position={[0, -1, 2]} intensity={2} color={rColor} />
+      <group ref={groupRef} scale={[2.0, 2.0, 2.0]} position={[0, -0.45, 0]}>
+        <CharacterBody unitId={unit.id} color={unit.color} auraColor={unit.auraColor} />
+      </group>
+    </>
   );
 }
 
@@ -221,19 +259,31 @@ function SummonReveal({ unit, rColor, index, total, isLast, onNext, onRevealAll 
       )}
 
       <div className={`reveal-card ${visible ? 'reveal-card-visible' : ''}`} style={{ borderColor: rColor, boxShadow: `0 0 40px ${rColor}66` }}>
-        {/* Unit visual */}
-        <div className="reveal-unit-visual">
-          <div className="reveal-orb" style={{ background: unit.color, boxShadow: `0 0 60px ${unit.auraColor}, 0 0 120px ${unit.auraColor}44` }} />
-          <div className="reveal-aura" style={{ background: `radial-gradient(circle, ${unit.auraColor}66, transparent 70%)` }} />
-          <div className="reveal-particles">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="reveal-particle" style={{
-                background: unit.trailColor,
-                animationDelay: `${i * 0.15}s`,
-                transform: `rotate(${i * 45}deg) translateY(-60px)`,
-              }} />
-            ))}
-          </div>
+        {/* 3D character model */}
+        <div className="reveal-3d-canvas" style={{
+          borderColor: rColor,
+          boxShadow: `0 0 28px ${rColor}88`,
+          background: `radial-gradient(ellipse at center, ${unit.auraColor}22 0%, #000814 80%)`,
+        }}>
+          <Canvas
+            camera={{ position: [0, 0.35, 2.1], fov: 58 }}
+            gl={{ antialias: true, powerPreference: 'default' }}
+          >
+            <SpinningModel unit={unit} rColor={rColor} />
+          </Canvas>
+        </div>
+        {/* Aura particles */}
+        <div style={{ position: 'relative', height: 0, overflow: 'visible' }}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="reveal-particle" style={{
+              background: unit.trailColor,
+              animationDelay: `${i * 0.18}s`,
+              animationDuration: `${1.8 + i * 0.2}s`,
+              left: '50%',
+              top: '-10px',
+              transform: `rotate(${i * 45}deg) translateY(-85px)`,
+            }} />
+          ))}
         </div>
 
         {/* Rarity */}

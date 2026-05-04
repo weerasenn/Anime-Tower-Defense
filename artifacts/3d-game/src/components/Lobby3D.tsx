@@ -790,36 +790,185 @@ function RaidNPC() {
 }
 
 // ================================================================
-// Player Character
+// LeBron James Player Character — tall, Lakers colors, walking anim
 // ================================================================
 function PlayerMesh({ playerRef }: { playerRef: React.RefObject<THREE.Group> }) {
-  const bodyRef = useRef<THREE.Mesh>(null!);
+  const leftLegRef = useRef<THREE.Group>(null!);
+  const rightLegRef = useRef<THREE.Group>(null!);
+  const leftArmRef = useRef<THREE.Group>(null!);
+  const rightArmRef = useRef<THREE.Group>(null!);
+  const prevPos = useRef(new THREE.Vector3());
+
   useFrame((state) => {
-    if (bodyRef.current) {
-      bodyRef.current.position.y = 0.8 + Math.sin(state.clock.elapsedTime * 4) * 0.04;
-    }
+    if (!playerRef.current) return;
+    const pp = playerRef.current.position;
+    const dx = pp.x - prevPos.current.x;
+    const dz = pp.z - prevPos.current.z;
+    const moving = Math.abs(dx) > 0.001 || Math.abs(dz) > 0.001;
+    prevPos.current.copy(pp);
+
+    const t = state.clock.elapsedTime * 7;
+    const swing = moving ? Math.sin(t) * 0.45 : 0;
+    const armSwing = moving ? Math.sin(t) * 0.3 : 0;
+
+    if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
+    if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
+    if (leftArmRef.current) leftArmRef.current.rotation.x = -armSwing;
+    if (rightArmRef.current) rightArmRef.current.rotation.x = armSwing;
   });
+
   return (
     <group ref={playerRef}>
-      {/* Shadow on ground */}
+      {/* Ground shadow */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-        <circleGeometry args={[0.4, 12]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.35} />
+        <circleGeometry args={[0.46, 16]} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.28} />
       </mesh>
-      {/* Body */}
-      <mesh ref={bodyRef} position={[0, 0.8, 0]} castShadow>
-        <capsuleGeometry args={[0.3, 0.8, 6, 12]} />
-        <meshStandardMaterial color="#e2e8f0" emissive="#3B82F6" emissiveIntensity={0.2} roughness={0.3} />
+
+      {/* ── Legs ── */}
+      <group ref={leftLegRef} position={[-0.19, 0.9, 0]}>
+        {/* Thigh — purple shorts */}
+        <mesh position={[0, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.13, 0.12, 0.56, 8]} />
+          <meshStandardMaterial color="#552583" roughness={0.7} />
+        </mesh>
+        {/* Shin — skin */}
+        <mesh position={[0, -0.53, 0]} castShadow>
+          <cylinderGeometry args={[0.1, 0.09, 0.52, 8]} />
+          <meshStandardMaterial color="#A07040" roughness={0.6} />
+        </mesh>
+        {/* Shoe — Lakers gold */}
+        <mesh position={[0, -0.86, 0.07]} castShadow>
+          <boxGeometry args={[0.22, 0.15, 0.34]} />
+          <meshStandardMaterial color="#FDB927" roughness={0.45} metalness={0.2} />
+        </mesh>
+        <mesh position={[0, -0.94, 0.07]}>
+          <boxGeometry args={[0.24, 0.06, 0.35]} />
+          <meshStandardMaterial color="#f1f5f9" roughness={0.8} />
+        </mesh>
+      </group>
+
+      <group ref={rightLegRef} position={[0.19, 0.9, 0]}>
+        <mesh position={[0, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.13, 0.12, 0.56, 8]} />
+          <meshStandardMaterial color="#552583" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, -0.53, 0]} castShadow>
+          <cylinderGeometry args={[0.1, 0.09, 0.52, 8]} />
+          <meshStandardMaterial color="#A07040" roughness={0.6} />
+        </mesh>
+        <mesh position={[0, -0.86, 0.07]} castShadow>
+          <boxGeometry args={[0.22, 0.15, 0.34]} />
+          <meshStandardMaterial color="#FDB927" roughness={0.45} metalness={0.2} />
+        </mesh>
+        <mesh position={[0, -0.94, 0.07]}>
+          <boxGeometry args={[0.24, 0.06, 0.35]} />
+          <meshStandardMaterial color="#f1f5f9" roughness={0.8} />
+        </mesh>
+      </group>
+
+      {/* Shorts waistband */}
+      <mesh position={[0, 1.19, 0]}>
+        <boxGeometry args={[0.5, 0.09, 0.32]} />
+        <meshStandardMaterial color="#3a1c5e" roughness={0.85} />
       </mesh>
-      {/* Head */}
-      <mesh position={[0, 1.75, 0]} castShadow>
-        <sphereGeometry args={[0.28, 10, 10]} />
-        <meshStandardMaterial color="#fde68a" roughness={0.4} />
+
+      {/* ── Torso — Lakers purple jersey ── */}
+      <mesh position={[0, 1.54, 0]} castShadow>
+        <boxGeometry args={[0.56, 0.72, 0.33]} />
+        <meshStandardMaterial color="#552583" roughness={0.65} />
       </mesh>
-      {/* Direction indicator */}
-      <mesh position={[0, 1.75, -0.32]} rotation={[-Math.PI / 2, 0, 0]}>
-        <coneGeometry args={[0.08, 0.18, 4]} />
-        <meshStandardMaterial color="#3B82F6" emissive="#3B82F6" emissiveIntensity={1.5} />
+      {/* Jersey number plate gold */}
+      <mesh position={[0, 1.57, 0.17]}>
+        <boxGeometry args={[0.24, 0.3, 0.01]} />
+        <meshStandardMaterial color="#FDB927" emissive="#FDB927" emissiveIntensity={0.3} roughness={0.5} />
+      </mesh>
+
+      {/* ── Arms ── */}
+      <group ref={leftArmRef} position={[-0.39, 1.74, 0]}>
+        <mesh position={[0, -0.22, 0]} castShadow rotation={[0, 0, 0.1]}>
+          <cylinderGeometry args={[0.1, 0.09, 0.5, 8]} />
+          <meshStandardMaterial color="#A07040" roughness={0.55} />
+        </mesh>
+        <mesh position={[0, -0.6, 0.04]} castShadow rotation={[0.22, 0, 0.05]}>
+          <cylinderGeometry args={[0.09, 0.08, 0.44, 8]} />
+          <meshStandardMaterial color="#906035" roughness={0.55} />
+        </mesh>
+        <mesh position={[0, -0.88, 0.1]} castShadow>
+          <sphereGeometry args={[0.09, 8, 8]} />
+          <meshStandardMaterial color="#906035" roughness={0.5} />
+        </mesh>
+      </group>
+
+      <group ref={rightArmRef} position={[0.39, 1.74, 0]}>
+        <mesh position={[0, -0.22, 0]} castShadow rotation={[0, 0, -0.1]}>
+          <cylinderGeometry args={[0.1, 0.09, 0.5, 8]} />
+          <meshStandardMaterial color="#A07040" roughness={0.55} />
+        </mesh>
+        <mesh position={[0, -0.6, 0.04]} castShadow rotation={[0.22, 0, -0.05]}>
+          <cylinderGeometry args={[0.09, 0.08, 0.44, 8]} />
+          <meshStandardMaterial color="#906035" roughness={0.55} />
+        </mesh>
+        <mesh position={[0, -0.88, 0.1]} castShadow>
+          <sphereGeometry args={[0.09, 8, 8]} />
+          <meshStandardMaterial color="#906035" roughness={0.5} />
+        </mesh>
+      </group>
+
+      {/* ── Neck ── */}
+      <mesh position={[0, 1.94, 0]} castShadow>
+        <cylinderGeometry args={[0.13, 0.15, 0.18, 8]} />
+        <meshStandardMaterial color="#A07040" roughness={0.55} />
+      </mesh>
+
+      {/* ── Head — large bald ── */}
+      <mesh position={[0, 2.24, 0]} castShadow>
+        <sphereGeometry args={[0.3, 14, 14]} />
+        <meshStandardMaterial color="#A07040" roughness={0.5} />
+      </mesh>
+      {/* Shaved hair cap (dark ring on top) */}
+      <mesh position={[0, 2.4, 0]}>
+        <sphereGeometry args={[0.285, 12, 6, 0, Math.PI * 2, 0, Math.PI * 0.35]} />
+        <meshStandardMaterial color="#2a1508" roughness={0.96} />
+      </mesh>
+      {/* Beard */}
+      <mesh position={[0, 2.08, 0.22]} rotation={[0.3, 0, 0]}>
+        <boxGeometry args={[0.3, 0.2, 0.1]} />
+        <meshStandardMaterial color="#1a0c02" roughness={0.9} />
+      </mesh>
+      <mesh position={[-0.15, 2.11, 0.18]} rotation={[0.2, 0.3, 0]}>
+        <boxGeometry args={[0.1, 0.18, 0.08]} />
+        <meshStandardMaterial color="#1a0c02" roughness={0.9} />
+      </mesh>
+      <mesh position={[0.15, 2.11, 0.18]} rotation={[0.2, -0.3, 0]}>
+        <boxGeometry args={[0.1, 0.18, 0.08]} />
+        <meshStandardMaterial color="#1a0c02" roughness={0.9} />
+      </mesh>
+      {/* Eyes */}
+      <mesh position={[-0.1, 2.26, 0.27]}>
+        <sphereGeometry args={[0.042, 6, 6]} />
+        <meshStandardMaterial color="#1a0c02" roughness={0.3} />
+      </mesh>
+      <mesh position={[0.1, 2.26, 0.27]}>
+        <sphereGeometry args={[0.042, 6, 6]} />
+        <meshStandardMaterial color="#1a0c02" roughness={0.3} />
+      </mesh>
+
+      {/* ── Crown glow (LeBron is the King) ── */}
+      <mesh position={[0, 2.72, 0]}>
+        <sphereGeometry args={[0.09, 6, 6]} />
+        <meshStandardMaterial color="#FDB927" emissive="#FDB927" emissiveIntensity={3.5} transparent opacity={0.85} />
+      </mesh>
+      {/* Name tag glow strip */}
+      <mesh position={[0, 2.8, 0]}>
+        <boxGeometry args={[0.7, 0.14, 0.01]} />
+        <meshStandardMaterial color="#FDB927" emissive="#FDB927" emissiveIntensity={1.8} transparent opacity={0.7} />
+      </mesh>
+
+      {/* Direction nub */}
+      <mesh position={[0, 1.9, -0.38]}>
+        <sphereGeometry args={[0.06, 6, 6]} />
+        <meshStandardMaterial color="#FDB927" emissive="#FDB927" emissiveIntensity={2.5} />
       </mesh>
     </group>
   );
@@ -836,8 +985,8 @@ function CameraRig({ playerRef }: { playerRef: React.RefObject<THREE.Group> }) {
   useFrame(() => {
     if (!playerRef.current) return;
     const pp = playerRef.current.position;
-    camTarget.current.set(pp.x, pp.y + 7, pp.z + 11);
-    lookTarget.current.set(pp.x, pp.y + 1, pp.z);
+    camTarget.current.set(pp.x, pp.y + 5.5, pp.z + 9);
+    lookTarget.current.set(pp.x, pp.y + 0.8, pp.z - 1);
     camera.position.lerp(camTarget.current, 0.09);
     camera.lookAt(lookTarget.current);
   });
@@ -897,15 +1046,15 @@ function EnvDecor() {
 function LobbyLighting() {
   return (
     <>
-      <ambientLight intensity={0.35} color="#1e1b4b" />
-      <directionalLight position={[0, 15, 5]} intensity={0.8} color="#ffffff" castShadow />
-      <pointLight position={[0, 4, -16]} intensity={4.0} color="#7C3AED" distance={12} />
-      <pointLight position={[0, 3, 0]} intensity={2.0} color="#3B82F6" distance={15} />
-      <pointLight position={[-8, 3, -2]} intensity={2.5} color="#F59E0B" distance={8} />
-      <pointLight position={[8, 3, -2]} intensity={2.5} color="#EF4444" distance={8} />
-      <pointLight position={[0, 5, 17]} intensity={1.5} color="#22d3ee" distance={12} />
-      <hemisphereLight args={['#1e293b', '#0a0f1a', 0.6]} />
-      <fog attach="fog" args={['#050510', 30, 55]} />
+      <ambientLight intensity={1.1} color="#d0e0ff" />
+      <directionalLight position={[0, 15, 5]} intensity={2.2} color="#ffffff" castShadow />
+      <pointLight position={[0, 5, -16]} intensity={7.0} color="#7C3AED" distance={18} />
+      <pointLight position={[0, 4, 0]} intensity={4.0} color="#60a5fa" distance={22} />
+      <pointLight position={[-8, 4, -2]} intensity={4.5} color="#F59E0B" distance={14} />
+      <pointLight position={[8, 4, -2]} intensity={4.5} color="#EF4444" distance={14} />
+      <pointLight position={[0, 6, 17]} intensity={3.5} color="#22d3ee" distance={20} />
+      <hemisphereLight args={['#4a6fa5', '#1a2a3a', 1.3]} />
+      <fog attach="fog" args={['#0d1326', 38, 70]} />
     </>
   );
 }

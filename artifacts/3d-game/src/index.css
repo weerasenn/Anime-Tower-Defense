@@ -1682,18 +1682,59 @@ body {
   .pool-card { padding: 6px 8px; }
 }
 
-/* Secret pull flash effect */
+/* Secret pull flash effect — cinematic rainbow sweep */
 .secret-flash {
   position: fixed;
   inset: 0;
-  background: linear-gradient(45deg, #7C3AED44, #E879F944, #3B82F644, #EF444444);
-  background-size: 400% 400%;
-  animation: secretFlash 1.5s ease forwards;
+  background: linear-gradient(135deg,
+    #7C3AED, #E879F9, #3B82F6, #F59E0B,
+    #EF4444, #E879F9, #7C3AED, #22d3ee);
+  background-size: 600% 600%;
+  animation: secretFlash 2.4s ease-out forwards;
   pointer-events: none;
-  z-index: 200;
+  z-index: 300;
+  mix-blend-mode: screen;
 }
 @keyframes secretFlash {
-  0%   { opacity: 0; }
-  20%  { opacity: 0.7; }
-  100% { opacity: 0; }
+  0%   { opacity: 0; background-position: 0% 50%; }
+  12%  { opacity: 0.9; background-position: 40% 60%; }
+  40%  { opacity: 0.65; background-position: 80% 20%; }
+  75%  { opacity: 0.3; background-position: 100% 80%; }
+  100% { opacity: 0; background-position: 0% 50%; }
+}
+
+/* 3D canvas inside reveal card */
+.reveal-3d-canvas {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 8px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid;
+  position: relative;
+  flex-shrink: 0;
+}
+.reveal-3d-canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Pity counter on summon screen */
+.summon-pity {
+  font-size: 12px;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.summon-pity strong { color: var(--text2); }
+.pity-warning { color: #F59E0B; font-weight: 700; animation: pityPulse 1s ease-in-out infinite alternate; }
+.pity-critical { color: #E879F9; font-weight: 800; animation: pityPulse 0.6s ease-in-out infinite alternate; }
+@keyframes pityPulse {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; transform: scale(1.05); }
 }

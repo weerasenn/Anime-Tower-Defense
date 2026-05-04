@@ -752,8 +752,8 @@ function TowerMesh({ unitId, gridX, gridZ, placedId, lastAbilityTime }: {
         />
       </mesh>
 
-      {/* Character model — floats up and down */}
-      <group ref={bodyRef} castShadow>
+      {/* Character model — floats up and down, scaled up */}
+      <group ref={bodyRef} castShadow scale={[1.45, 1.45, 1.45]}>
         <CharacterBody unitId={unitId} color={unitData.color} auraColor={unitData.auraColor} />
       </group>
 
@@ -893,14 +893,14 @@ function GameTick() {
 }
 
 // ============================================================
-// Camera setup — isometric top-down view
+// Camera setup — low isometric 3rd-person view
 // ============================================================
 function CameraSetup() {
   const { camera } = useThree();
   useEffect(() => {
-    camera.position.set(0, 14, 10);
-    camera.lookAt(0, 0, 0);
-    (camera as THREE.PerspectiveCamera).fov = 55;
+    camera.position.set(0, 8, 9);
+    camera.lookAt(0, 0, -2);
+    (camera as THREE.PerspectiveCamera).fov = 62;
     (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
   }, [camera]);
   return null;
@@ -940,16 +940,16 @@ function Scene({ selectedUnitId, hoveredCell, onCellClick, onCellHover }: {
       <CameraSetup />
       <GameTick />
 
-      {/* Lighting */}
-      <ambientLight intensity={0.4} color="#1e3a5f" />
-      <directionalLight position={[5, 12, 8]} intensity={1.2} color="#ffffff" castShadow />
-      <pointLight position={[0, 8, 0]} intensity={0.8} color="#3B82F6" />
-      <pointLight position={[-5, 4, -5]} intensity={0.5} color="#7C3AED" />
-      <pointLight position={[5, 4, 5]} intensity={0.5} color="#EF4444" />
-      <hemisphereLight args={['#0f172a', '#1e293b', 0.5]} />
+      {/* Lighting — brighter so models are visible */}
+      <ambientLight intensity={1.0} color="#d0e0ff" />
+      <directionalLight position={[5, 12, 8]} intensity={2.0} color="#ffffff" castShadow />
+      <pointLight position={[0, 7, 0]} intensity={1.8} color="#3B82F6" />
+      <pointLight position={[-5, 4, -5]} intensity={1.2} color="#7C3AED" />
+      <pointLight position={[5, 4, 5]} intensity={1.2} color="#EF4444" />
+      <hemisphereLight args={['#1e3a5f', '#1e293b', 1.0]} />
 
-      {/* Fog */}
-      <fog attach="fog" args={['#050510', 20, 40]} />
+      {/* Fog — pull back so units are visible */}
+      <fog attach="fog" args={['#050510', 24, 44]} />
 
       {/* Floor & path */}
       <GameFloor onCellClick={onCellClick} selectedUnitId={selectedUnitId} />
