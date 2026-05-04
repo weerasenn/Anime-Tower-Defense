@@ -1,5 +1,6 @@
 // ============================================================
 // INVENTORY — Unit collection, equip, upgrade, evolve
+// Mobile-first layout with bottom-sheet detail drawer
 // ============================================================
 
 import { useState } from 'react';
@@ -14,6 +15,7 @@ export default function Inventory() {
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortMode>('rarity');
   const [filter, setFilter] = useState<FilterRarity>('all');
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
   const rarityOrder: Record<string, number> = { secret: 0, mythic: 1, legendary: 2, epic: 3, rare: 4 };
 
@@ -41,9 +43,8 @@ export default function Inventory() {
 
   function handleEquip() {
     if (!selectedUnitId) return;
-    // Find first empty slot
     const emptySlot = equippedUnitIds.indexOf(null);
-    if (emptySlot === -1) return; // all slots full
+    if (emptySlot === -1) return;
     equipUnit(selectedUnitId, emptySlot);
   }
 
@@ -65,15 +66,35 @@ export default function Inventory() {
     }
   }
 
+  function handleCardClick(unitId: string) {
+    setSelectedUnitId(unitId);
+    setMobileSheetOpen(true);
+  }
+
   const upgradeCost = selectedOwned ? selectedOwned.level * 50 : 0;
   const canUpgrade = selectedOwned ? selectedOwned.level < 10 && profile.coins >= upgradeCost : false;
+
+  const detailProps = selectedData && selectedOwned ? {
+    data: selectedData,
+    owned: selectedOwned,
+    isEquipped,
+    canEquip: !isEquipped && equippedUnitIds.filter(Boolean).length < 5,
+    canUpgrade,
+    upgradeCost,
+    canEvolve: !!canEvolve,
+    nextEvolution,
+    onEquip: handleEquip,
+    onUnequip: handleUnequip,
+    onUpgrade: handleUpgrade,
+    onEvolve: handleEvolve,
+  } : null;
 
   return (
     <div className="inventory-screen">
       <div className="inventory-header">
         <button className="back-btn" onClick={() => setScreen('lobby')}>← Back</button>
         <h2 className="section-title">📦 UNIT COLLECTION</h2>
-        <div className="inventory-count">{ownedUnits.length} units owned</div>
+        <div className="inventory-count">{ownedUnits.length} units</div>
       </div>
 
       {/* Equipped bar */}
@@ -87,7 +108,7 @@ export default function Inventory() {
               key={i}
               className={`equip-slot-btn ${uid ? 'filled' : 'empty'}`}
               style={{ borderColor: rc }}
-              onClick={() => uid ? setSelectedUnitId(uid) : undefined}
+              onClick={() => { if (uid) { handleCardClick(uid); } }}
             >
               {data ? (
                 <>
@@ -103,7 +124,7 @@ export default function Inventory() {
       </div>
 
       <div className="inventory-body">
-        {/* List panel */}
+        {/* List panel — full width on mobile */}
         <div className="inventory-list-panel">
           {/* Filters */}
           <div className="filter-row">
@@ -126,7 +147,6 @@ export default function Inventory() {
             ))}
           </div>
 
-          {/* Unit grid */}
           {sortedOwned.length === 0 ? (
             <div className="empty-collection">
               <div style={{ fontSize: 48 }}>📦</div>
@@ -147,7 +167,7 @@ export default function Inventory() {
                     key={owned.unitId}
                     className={`unit-card ${selectedUnitId === owned.unitId ? 'selected' : ''} ${equipped ? 'equipped' : ''}`}
                     style={{ borderColor: rc }}
-                    onClick={() => setSelectedUnitId(owned.unitId)}
+                    onClick={() => handleCardClick(owned.unitId)}
                   >
                     <div className="unit-card-orb" style={{ background: data.color, boxShadow: `0 0 12px ${data.auraColor}` }} />
                     <div className="unit-card-info">
@@ -163,31 +183,29 @@ export default function Inventory() {
           )}
         </div>
 
-        {/* Detail panel */}
-        <div className="inventory-detail-panel">
-          {selectedData && selectedOwned ? (
-            <UnitDetail
-              data={selectedData}
-              owned={selectedOwned}
-              isEquipped={isEquipped}
-              canEquip={!isEquipped && equippedUnitIds.filter(Boolean).length < 5}
-              canUpgrade={canUpgrade}
-              upgradeCost={upgradeCost}
-              canEvolve={!!canEvolve}
-              nextEvolution={nextEvolution}
-              onEquip={handleEquip}
-              onUnequip={handleUnequip}
-              onUpgrade={handleUpgrade}
-              onEvolve={handleEvolve}
-            />
+        {/* Desktop side detail panel */}
+        <div className="inventory-detail-panel desktop-only">
+          {detailProps ? (
+            <UnitDetail {...detailProps} />
           ) : (
             <div className="detail-empty">
               <div style={{ fontSize: 48, opacity: 0.3 }}>⚔️</div>
-              <div style={{ opacity: 0.5 }}>Select a unit to view details</div>
+              <div style={{ opacity: 0.5 }}>Select a unit</div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Mobile bottom-sheet drawer */}
+      {mobileSheetOpen && detailProps && (
+        <div className="mobile-detail-overlay" onClick={() => setMobileSheetOpen(false)}>
+          <div className="mobile-detail-sheet" onClick={e => e.stopPropagation()}>
+            <div className="mobile-detail-handle" />
+            <button className="mobile-sheet-close" onClick={() => setMobileSheetOpen(false)}>✕</button>
+            <UnitDetail {...detailProps} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -209,13 +227,8 @@ function UnitDetail({ data, owned, isEquipped, canEquip, canUpgrade, upgradeCost
   const rc = RARITY_COLORS[data.rarity];
   const levelMult = 1 + (owned.level - 1) * 0.1;
 
-  const rarityStars: Record<string, string> = {
-    common: '★', rare: '★★', epic: '★★★', legendary: '★★★★',
-  };
-
   return (
     <div className="unit-detail">
-      {/* Header */}
       <div className="detail-header" style={{ borderColor: rc }}>
         <div className="detail-orb" style={{ background: data.color, boxShadow: `0 0 30px ${data.auraColor}, 0 0 60px ${data.auraColor}44` }}>
           <div className="detail-particles">
@@ -225,14 +238,13 @@ function UnitDetail({ data, owned, isEquipped, canEquip, canUpgrade, upgradeCost
           </div>
         </div>
         <div className="detail-title-block">
-          <div className="detail-rarity-stars" style={{ color: rc }}>{rarityStars[data.rarity]}</div>
           <div className="detail-name">{data.name}</div>
           <div className="detail-subtitle" style={{ color: rc }}>{data.title}</div>
           <div className="detail-role">{data.role.toUpperCase()}</div>
+          <div className="detail-rarity-badge" style={{ color: rc, borderColor: rc }}>{data.rarity.toUpperCase()}</div>
         </div>
       </div>
 
-      {/* Level bar */}
       <div className="detail-level">
         <span>LEVEL {owned.level}</span>
         <div className="level-bar-bg">
@@ -241,7 +253,6 @@ function UnitDetail({ data, owned, isEquipped, canEquip, canUpgrade, upgradeCost
         <span>MAX 10</span>
       </div>
 
-      {/* Stats */}
       <div className="detail-stats">
         <StatRow label="HP" value={Math.round(data.stats.hp * levelMult)} color="#4ADE80" />
         <StatRow label="ATK" value={Math.round(data.stats.atk * levelMult)} color="#F87171" />
@@ -250,7 +261,6 @@ function UnitDetail({ data, owned, isEquipped, canEquip, canUpgrade, upgradeCost
         <StatRow label="DEF" value={Math.round(data.stats.defense * levelMult)} color="#A78BFA" />
       </div>
 
-      {/* Ability */}
       <div className="detail-ability" style={{ borderColor: rc + '66' }}>
         <div className="detail-ability-header">
           <div className="detail-ability-name">⚡ {data.ability.name}</div>
@@ -263,7 +273,6 @@ function UnitDetail({ data, owned, isEquipped, canEquip, canUpgrade, upgradeCost
         </div>
       </div>
 
-      {/* Shards & Evolution */}
       <div className="detail-shards">
         <div className="shards-bar">
           <span className="shards-label">🔮 {owned.shards} / {data.evolutionMaterials || '—'} shards</span>
@@ -284,7 +293,6 @@ function UnitDetail({ data, owned, isEquipped, canEquip, canUpgrade, upgradeCost
         )}
       </div>
 
-      {/* Buttons */}
       <div className="detail-actions">
         {isEquipped ? (
           <button className="action-btn action-btn-unequip" onClick={onUnequip}>

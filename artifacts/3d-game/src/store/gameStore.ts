@@ -152,6 +152,7 @@ interface GameStoreState {
   togglePause: () => void;
   setSpeed: (speed: number) => void;
   addGold: (amount: number) => void;
+  testSummonSecret: () => void;
 }
 
 // ---- PATH DEFINITION (world coords) ----
@@ -397,6 +398,15 @@ export const useGameStore = create<GameStoreState>()(
       },
 
       clearRevealQueue: () => set({ revealQueue: [] }),
+
+      testSummonSecret: () => {
+        const { addUnit } = get();
+        const secretPool = Object.values(UNITS).filter(u => u.rarity === 'secret' && u.summonWeight > 0);
+        if (secretPool.length === 0) return;
+        const picked = secretPool[Math.floor(Math.random() * secretPool.length)];
+        addUnit(picked);
+        set({ revealQueue: [picked] });
+      },
 
       // ------- Game -------
       startGame: (mode) => {

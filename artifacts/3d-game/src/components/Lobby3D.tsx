@@ -287,94 +287,181 @@ function SummonTemple() {
 }
 
 // ================================================================
-// Naruto Six Paths NPC — Summon NPC
+// Naruto Six Paths NPC — Summon NPC (full humanoid model)
 // ================================================================
-function NarutoSixPathsNPC({ playerPos }: { playerPos: React.RefObject<[number, number, number]> }) {
+function NarutoSixPathsNPC({ playerPos: _playerPos }: { playerPos: React.RefObject<[number, number, number]> }) {
   const groupRef = useRef<THREE.Group>(null!);
   const orbGroupRef = useRef<THREE.Group>(null!);
+  const cloakRef = useRef<THREE.Mesh>(null!);
 
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.position.y = 0.3 + Math.sin(state.clock.elapsedTime * 1.2) * 0.25;
+      groupRef.current.position.y = 0.1 + Math.sin(state.clock.elapsedTime * 1.2) * 0.18;
     }
     if (orbGroupRef.current) {
       orbGroupRef.current.rotation.y += 0.008;
     }
+    if (cloakRef.current) {
+      const pulse = 0.12 + Math.sin(state.clock.elapsedTime * 2) * 0.04;
+      (cloakRef.current.material as THREE.MeshStandardMaterial).opacity = pulse;
+    }
   });
-
-  const N_ORBS = 9;
 
   return (
     <group position={NPC_SUMMON_POS}>
       <group ref={groupRef}>
-        {/* Body */}
-        <mesh position={[0, 1.0, 0]} castShadow>
-          <cylinderGeometry args={[0.35, 0.35, 1.4, 10]} />
-          <meshStandardMaterial
-            color="#F97316"
-            emissive="#FBBF24"
-            emissiveIntensity={0.8}
-          />
+        {/* Legs */}
+        <mesh position={[-0.18, 0.32, 0]} castShadow>
+          <cylinderGeometry args={[0.1, 0.09, 0.64, 8]} />
+          <meshStandardMaterial color="#F97316" />
+        </mesh>
+        <mesh position={[0.18, 0.32, 0]} castShadow>
+          <cylinderGeometry args={[0.1, 0.09, 0.64, 8]} />
+          <meshStandardMaterial color="#F97316" />
+        </mesh>
+        {/* Sandals */}
+        <mesh position={[-0.18, 0.03, 0.04]}>
+          <boxGeometry args={[0.18, 0.06, 0.22]} />
+          <meshStandardMaterial color="#111827" />
+        </mesh>
+        <mesh position={[0.18, 0.03, 0.04]}>
+          <boxGeometry args={[0.18, 0.06, 0.22]} />
+          <meshStandardMaterial color="#111827" />
         </mesh>
 
-        {/* Head */}
-        <mesh position={[0, 2.0, 0]} castShadow>
-          <sphereGeometry args={[0.42, 12, 12]} />
-          <meshStandardMaterial color="#FBBF24" emissive="#F97316" emissiveIntensity={0.6} />
+        {/* Orange jacket torso */}
+        <mesh position={[0, 0.88, 0]} castShadow>
+          <boxGeometry args={[0.56, 0.72, 0.42]} />
+          <meshStandardMaterial color="#F97316" emissive="#FBBF24" emissiveIntensity={0.4} roughness={0.6} />
+        </mesh>
+        {/* White sage cloak over jacket */}
+        <mesh position={[0, 0.88, -0.01]} castShadow>
+          <boxGeometry args={[0.66, 0.74, 0.44]} />
+          <meshStandardMaterial color="#F1F5F9" emissive="#F59E0B" emissiveIntensity={0.25} transparent opacity={0.75} roughness={0.5} />
+        </mesh>
+        {/* Cloak tail behind */}
+        <mesh position={[0, 0.45, -0.24]} rotation={[0.25, 0, 0]}>
+          <boxGeometry args={[0.55, 0.6, 0.06]} />
+          <meshStandardMaterial color="#F1F5F9" transparent opacity={0.65} />
         </mesh>
 
-        {/* Chakra cloak (outer aura) */}
-        <mesh position={[0, 1.0, 0]}>
-          <cylinderGeometry args={[0.65, 0.65, 2.0, 10]} />
-          <meshStandardMaterial color="#F59E0B" emissive="#F59E0B" emissiveIntensity={1.0} transparent opacity={0.25} />
+        {/* Arms */}
+        <mesh position={[-0.46, 0.96, 0]} rotation={[0, 0, Math.PI / 10]} castShadow>
+          <cylinderGeometry args={[0.09, 0.08, 0.55, 8]} />
+          <meshStandardMaterial color="#F97316" />
+        </mesh>
+        <mesh position={[0.46, 0.96, 0]} rotation={[0, 0, -Math.PI / 10]} castShadow>
+          <cylinderGeometry args={[0.09, 0.08, 0.55, 8]} />
+          <meshStandardMaterial color="#F97316" />
+        </mesh>
+
+        {/* Head — skin tone */}
+        <mesh position={[0, 1.62, 0]} castShadow>
+          <sphereGeometry args={[0.3, 14, 14]} />
+          <meshStandardMaterial color="#FBBF24" roughness={0.5} />
+        </mesh>
+        {/* Headband plate */}
+        <mesh position={[0, 1.78, 0.25]} rotation={[0.15, 0, 0]}>
+          <boxGeometry args={[0.44, 0.12, 0.06]} />
+          <meshStandardMaterial color="#475569" metalness={0.8} roughness={0.3} />
+        </mesh>
+        {/* Headband cloth ties */}
+        <mesh position={[-0.26, 1.76, 0.0]} rotation={[0, 0, 0.3]}>
+          <boxGeometry args={[0.06, 0.28, 0.04]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+        <mesh position={[0.26, 1.76, 0.0]} rotation={[0, 0, -0.3]}>
+          <boxGeometry args={[0.06, 0.28, 0.04]} />
+          <meshStandardMaterial color="#1e293b" />
+        </mesh>
+
+        {/* Whiskers left */}
+        <mesh position={[-0.15, 1.61, 0.285]}><boxGeometry args={[0.18, 0.025, 0.02]} /><meshStandardMaterial color="#0f172a" /></mesh>
+        <mesh position={[-0.15, 1.54, 0.275]}><boxGeometry args={[0.17, 0.025, 0.02]} /><meshStandardMaterial color="#0f172a" /></mesh>
+        <mesh position={[-0.15, 1.47, 0.265]}><boxGeometry args={[0.16, 0.025, 0.02]} /><meshStandardMaterial color="#0f172a" /></mesh>
+        {/* Whiskers right */}
+        <mesh position={[0.15, 1.61, 0.285]}><boxGeometry args={[0.18, 0.025, 0.02]} /><meshStandardMaterial color="#0f172a" /></mesh>
+        <mesh position={[0.15, 1.54, 0.275]}><boxGeometry args={[0.17, 0.025, 0.02]} /><meshStandardMaterial color="#0f172a" /></mesh>
+        <mesh position={[0.15, 1.47, 0.265]}><boxGeometry args={[0.16, 0.025, 0.02]} /><meshStandardMaterial color="#0f172a" /></mesh>
+
+        {/* Sage mode eye rings */}
+        <mesh position={[-0.11, 1.63, 0.285]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.055, 0.014, 6, 12]} />
+          <meshStandardMaterial color="#F97316" emissive="#F97316" emissiveIntensity={2.5} />
+        </mesh>
+        <mesh position={[0.11, 1.63, 0.285]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.055, 0.014, 6, 12]} />
+          <meshStandardMaterial color="#F97316" emissive="#F97316" emissiveIntensity={2.5} />
+        </mesh>
+
+        {/* Hair — spiky blonde */}
+        <mesh position={[0, 2.02, 0.1]} rotation={[0.35, 0, 0]}>
+          <coneGeometry args={[0.13, 0.38, 5]} />
+          <meshStandardMaterial color="#FBBF24" emissive="#F59E0B" emissiveIntensity={0.7} />
+        </mesh>
+        <mesh position={[-0.15, 1.96, 0.06]} rotation={[0.2, -0.35, -0.22]}>
+          <coneGeometry args={[0.1, 0.3, 5]} />
+          <meshStandardMaterial color="#FBBF24" emissive="#F59E0B" emissiveIntensity={0.7} />
+        </mesh>
+        <mesh position={[0.15, 1.96, 0.06]} rotation={[0.2, 0.35, 0.22]}>
+          <coneGeometry args={[0.1, 0.3, 5]} />
+          <meshStandardMaterial color="#FBBF24" emissive="#F59E0B" emissiveIntensity={0.7} />
+        </mesh>
+        <mesh position={[0, 1.96, -0.1]} rotation={[-0.4, 0, 0]}>
+          <coneGeometry args={[0.09, 0.28, 5]} />
+          <meshStandardMaterial color="#FBBF24" emissive="#F59E0B" emissiveIntensity={0.7} />
         </mesh>
 
         {/* Shakujo staff */}
-        <mesh position={[0.55, 1.0, 0]}>
-          <cylinderGeometry args={[0.04, 0.04, 2.5, 6]} />
+        <mesh position={[0.62, 0.85, 0]}>
+          <cylinderGeometry args={[0.035, 0.035, 2.0, 6]} />
           <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.7} />
         </mesh>
-        {/* Staff ring */}
-        <mesh position={[0.55, 2.3, 0]}>
-          <torusGeometry args={[0.22, 0.05, 6, 16]} />
-          <meshStandardMaterial color="#374151" metalness={0.9} />
+        <mesh position={[0.62, 1.88, 0]}>
+          <torusGeometry args={[0.2, 0.042, 6, 12]} />
+          <meshStandardMaterial color="#374151" metalness={0.9} roughness={0.2} />
         </mesh>
+        {/* Staff ornament rings */}
+        {[1.6, 1.72, 1.84].map((y, i) => (
+          <mesh key={i} position={[0.72, y, 0]}>
+            <torusGeometry args={[0.08, 0.022, 6, 10]} />
+            <meshStandardMaterial color="#6B7280" metalness={0.8} />
+          </mesh>
+        ))}
 
-        {/* 9 Truth-Seeker Orbs floating in ring */}
-        <group ref={orbGroupRef} position={[0, 1.5, 0]}>
-          {Array.from({ length: N_ORBS }).map((_, i) => {
-            const angle = (i / N_ORBS) * Math.PI * 2;
+        {/* 9 Truth-Seeker Orbs */}
+        <group ref={orbGroupRef} position={[0, 1.4, 0]}>
+          {Array.from({ length: 9 }).map((_, i) => {
+            const angle = (i / 9) * Math.PI * 2;
+            const hy = Math.sin(angle * 1.5) * 0.25;
             return (
-              <mesh key={i} position={[Math.cos(angle) * 1.1, 0, Math.sin(angle) * 1.1]}>
-                <sphereGeometry args={[0.14, 8, 8]} />
-                <meshStandardMaterial
-                  color="#111827"
-                  emissive="#111827"
-                  emissiveIntensity={0.5}
-                  roughness={0.1}
-                  metalness={1.0}
-                />
+              <mesh key={i} position={[Math.cos(angle) * 1.25, hy, Math.sin(angle) * 1.25]}>
+                <sphereGeometry args={[0.13, 8, 8]} />
+                <meshStandardMaterial color="#111827" emissive="#0f172a" emissiveIntensity={0.8} roughness={0.05} metalness={1.0} />
               </mesh>
             );
           })}
         </group>
 
-        {/* Aura glow sphere */}
-        <mesh position={[0, 1.0, 0]}>
-          <sphereGeometry args={[1.3, 12, 12]} />
-          <meshBasicMaterial color="#F59E0B" transparent opacity={0.1} />
+        {/* Chakra cloak aura */}
+        <mesh ref={cloakRef} position={[0, 0.85, 0]}>
+          <cylinderGeometry args={[0.75, 0.65, 2.3, 14]} />
+          <meshStandardMaterial color="#F59E0B" emissive="#F59E0B" emissiveIntensity={1.2} transparent opacity={0.13} />
+        </mesh>
+        <mesh position={[0, 0.85, 0]}>
+          <sphereGeometry args={[1.35, 12, 12]} />
+          <meshBasicMaterial color="#F59E0B" transparent opacity={0.06} />
         </mesh>
       </group>
 
-      {/* NPC label sign */}
-      <mesh position={[0, 4.0, 0]}>
-        <boxGeometry args={[2.0, 0.6, 0.08]} />
-        <meshStandardMaterial color="#7C3AED" emissive="#7C3AED" emissiveIntensity={2.0} />
+      {/* Sign above */}
+      <mesh position={[0, 4.3, 0]}>
+        <boxGeometry args={[2.4, 0.68, 0.09]} />
+        <meshStandardMaterial color="#7C3AED" emissive="#7C3AED" emissiveIntensity={2.2} />
       </mesh>
-
       {/* Ground glow */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
-        <circleGeometry args={[1.8, 24]} />
+        <circleGeometry args={[1.9, 28]} />
         <meshBasicMaterial color="#F59E0B" transparent opacity={0.15} />
       </mesh>
     </group>
@@ -382,34 +469,161 @@ function NarutoSixPathsNPC({ playerPos }: { playerPos: React.RefObject<[number, 
 }
 
 // ================================================================
-// Evolution Dojo NPC (East side)
+// Itachi Uchiha NPC — Evolution Dojo (East side)
 // ================================================================
 function EvolutionNPC() {
-  const ref = useRef<THREE.Mesh>(null!);
+  const groupRef = useRef<THREE.Group>(null!);
+  const crowGroupRef = useRef<THREE.Group>(null!);
+  const leftEyeRef = useRef<THREE.Mesh>(null!);
+  const rightEyeRef = useRef<THREE.Mesh>(null!);
+
   useFrame((state) => {
-    if (ref.current) {
-      ref.current.position.y = 1.2 + Math.sin(state.clock.elapsedTime * 1.5 + 1) * 0.2;
-      ref.current.rotation.y += 0.01;
+    if (groupRef.current) {
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 1.0 + 1) * 0.14;
+    }
+    if (crowGroupRef.current) {
+      crowGroupRef.current.rotation.y += 0.014;
+    }
+    if (leftEyeRef.current && rightEyeRef.current) {
+      const pulse = 1.5 + Math.abs(Math.sin(state.clock.elapsedTime * 2.5)) * 2.5;
+      (leftEyeRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = pulse;
+      (rightEyeRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = pulse;
     }
   });
+
   return (
     <group position={NPC_EVOLUTION_POS}>
-      <mesh ref={ref} position={[0, 1.2, 0]} castShadow>
-        <octahedronGeometry args={[0.8]} />
-        <meshStandardMaterial color="#F59E0B" emissive="#D97706" emissiveIntensity={1.5} />
-      </mesh>
-      <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[1.3, 24]} />
-        <meshBasicMaterial color="#F59E0B" transparent opacity={0.2} />
-      </mesh>
+      <group ref={groupRef}>
+        {/* Legs — dark */}
+        <mesh position={[-0.15, 0.33, 0]} castShadow>
+          <cylinderGeometry args={[0.09, 0.08, 0.66, 8]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+        <mesh position={[0.15, 0.33, 0]} castShadow>
+          <cylinderGeometry args={[0.09, 0.08, 0.66, 8]} />
+          <meshStandardMaterial color="#0f172a" />
+        </mesh>
+
+        {/* Akatsuki cloak body */}
+        <mesh position={[0, 0.9, 0]} castShadow>
+          <cylinderGeometry args={[0.48, 0.52, 1.1, 10]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.85} />
+        </mesh>
+        {/* Red cloud patches on cloak */}
+        {[0, 1, 2, 3].map(i => {
+          const angle = (i / 4) * Math.PI * 2 + 0.4;
+          return (
+            <mesh key={i} position={[Math.cos(angle) * 0.47, 0.75 + (i % 2) * 0.22, Math.sin(angle) * 0.47]}>
+              <sphereGeometry args={[0.08, 6, 6]} />
+              <meshStandardMaterial color="#DC2626" emissive="#DC2626" emissiveIntensity={1.2} />
+            </mesh>
+          );
+        })}
+
+        {/* Cloak — white collar band */}
+        <mesh position={[0, 1.38, 0]}>
+          <cylinderGeometry args={[0.35, 0.48, 0.12, 10]} />
+          <meshStandardMaterial color="#f1f5f9" roughness={0.6} />
+        </mesh>
+
+        {/* Arms hidden in wide sleeves */}
+        <mesh position={[-0.52, 0.95, 0]} rotation={[0, 0, Math.PI / 8]} castShadow>
+          <cylinderGeometry args={[0.1, 0.09, 0.62, 8]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.85} />
+        </mesh>
+        <mesh position={[0.52, 0.95, 0]} rotation={[0, 0, -Math.PI / 8]} castShadow>
+          <cylinderGeometry args={[0.1, 0.09, 0.62, 8]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.85} />
+        </mesh>
+
+        {/* Head — pale skin */}
+        <mesh position={[0, 1.65, 0]} castShadow>
+          <sphereGeometry args={[0.28, 14, 14]} />
+          <meshStandardMaterial color="#D4A574" roughness={0.5} />
+        </mesh>
+
+        {/* Long dark hair swept back */}
+        <mesh position={[0, 1.7, -0.22]} rotation={[-0.25, 0, 0]}>
+          <cylinderGeometry args={[0.18, 0.06, 0.65, 8]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.9} />
+        </mesh>
+        <mesh position={[-0.12, 1.6, -0.3]} rotation={[-0.15, 0.25, 0.1]}>
+          <cylinderGeometry args={[0.06, 0.03, 0.52, 6]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.9} />
+        </mesh>
+        <mesh position={[0.12, 1.6, -0.3]} rotation={[-0.15, -0.25, -0.1]}>
+          <cylinderGeometry args={[0.06, 0.03, 0.52, 6]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.9} />
+        </mesh>
+        {/* Forehead protector — scratched */}
+        <mesh position={[0, 1.78, 0.24]} rotation={[0.12, 0, 0]}>
+          <boxGeometry args={[0.38, 0.11, 0.06]} />
+          <meshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
+        </mesh>
+        {/* Scratch mark on forehead protector */}
+        <mesh position={[0, 1.78, 0.27]}>
+          <boxGeometry args={[0.22, 0.02, 0.01]} />
+          <meshStandardMaterial color="#111827" />
+        </mesh>
+
+        {/* Sharingan eyes — glowing red */}
+        <mesh ref={leftEyeRef} position={[-0.1, 1.66, 0.265]}>
+          <sphereGeometry args={[0.048, 8, 8]} />
+          <meshStandardMaterial color="#DC2626" emissive="#DC2626" emissiveIntensity={3.0} />
+        </mesh>
+        <mesh ref={rightEyeRef} position={[0.1, 1.66, 0.265]}>
+          <sphereGeometry args={[0.048, 8, 8]} />
+          <meshStandardMaterial color="#DC2626" emissive="#DC2626" emissiveIntensity={3.0} />
+        </mesh>
+        {/* Sharingan tomoe rings */}
+        <mesh position={[-0.1, 1.66, 0.275]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.05, 0.01, 6, 10]} />
+          <meshStandardMaterial color="#7f1d1d" emissive="#EF4444" emissiveIntensity={1.5} />
+        </mesh>
+        <mesh position={[0.1, 1.66, 0.275]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.05, 0.01, 6, 10]} />
+          <meshStandardMaterial color="#7f1d1d" emissive="#EF4444" emissiveIntensity={1.5} />
+        </mesh>
+
+        {/* Crows orbiting */}
+        <group ref={crowGroupRef} position={[0, 1.9, 0]}>
+          {[0, 1, 2, 3, 4].map(i => {
+            const angle = (i / 5) * Math.PI * 2;
+            const hy = Math.sin(i * 1.3) * 0.35;
+            return (
+              <mesh key={i} position={[Math.cos(angle) * 1.6, hy, Math.sin(angle) * 1.6]}
+                rotation={[0, -angle, 0.3]}>
+                <tetrahedronGeometry args={[0.1]} />
+                <meshStandardMaterial color="#0f172a" emissive="#4C1D95" emissiveIntensity={1.0} />
+              </mesh>
+            );
+          })}
+        </group>
+
+        {/* Dark aura */}
+        <mesh position={[0, 0.9, 0]}>
+          <sphereGeometry args={[0.85, 10, 10]} />
+          <meshBasicMaterial color="#1e293b" transparent opacity={0.18} />
+        </mesh>
+        <mesh position={[0, 0.9, 0]}>
+          <sphereGeometry args={[1.1, 10, 10]} />
+          <meshBasicMaterial color="#7f1d1d" transparent opacity={0.06} />
+        </mesh>
+      </group>
+
       {/* Platform */}
       <mesh position={[0, 0.1, 0]}>
         <cylinderGeometry args={[1.0, 1.0, 0.2, 8]} />
         <meshStandardMaterial color="#1e293b" metalness={0.8} />
       </mesh>
+      {/* Gold evolution ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.21, 0]}>
+        <ringGeometry args={[0.88, 1.08, 24]} />
+        <meshBasicMaterial color="#F59E0B" transparent opacity={0.55} />
+      </mesh>
       {/* Sign */}
-      <mesh position={[0, 3.2, 0]}>
-        <boxGeometry args={[2.2, 0.55, 0.08]} />
+      <mesh position={[0, 3.6, 0]}>
+        <boxGeometry args={[2.5, 0.65, 0.09]} />
         <meshStandardMaterial color="#D97706" emissive="#D97706" emissiveIntensity={1.8} />
       </mesh>
     </group>
@@ -417,34 +631,158 @@ function EvolutionNPC() {
 }
 
 // ================================================================
-// Raid Tower NPC (West side)
+// Aizen Sosuke NPC — Raid Tower (West side)
 // ================================================================
 function RaidNPC() {
-  const ref = useRef<THREE.Mesh>(null!);
+  const groupRef = useRef<THREE.Group>(null!);
+  const pressureRef = useRef<THREE.Mesh>(null!);
+  const bladeRef = useRef<THREE.Mesh>(null!);
+
   useFrame((state) => {
-    if (ref.current) {
-      ref.current.position.y = 1.2 + Math.sin(state.clock.elapsedTime * 1.8 + 2) * 0.18;
-      ref.current.rotation.y -= 0.012;
+    if (groupRef.current) {
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8 + 2) * 0.1;
+    }
+    if (pressureRef.current) {
+      const t = state.clock.elapsedTime;
+      pressureRef.current.scale.setScalar(0.9 + Math.sin(t * 1.8) * 0.18);
+      (pressureRef.current.material as THREE.MeshBasicMaterial).opacity = 0.12 + Math.sin(t * 2.2) * 0.06;
+    }
+    if (bladeRef.current) {
+      const shine = 0.5 + Math.abs(Math.sin(state.clock.elapsedTime * 1.5)) * 1.2;
+      (bladeRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = shine;
     }
   });
+
   return (
     <group position={NPC_RAID_POS}>
-      <mesh ref={ref} position={[0, 1.2, 0]} castShadow>
-        <icosahedronGeometry args={[0.75]} />
-        <meshStandardMaterial color="#EF4444" emissive="#DC2626" emissiveIntensity={1.5} />
-      </mesh>
-      <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[1.3, 24]} />
-        <meshBasicMaterial color="#EF4444" transparent opacity={0.2} />
-      </mesh>
+      <group ref={groupRef}>
+        {/* Legs */}
+        <mesh position={[-0.15, 0.33, 0]} castShadow>
+          <cylinderGeometry args={[0.09, 0.09, 0.66, 8]} />
+          <meshStandardMaterial color="#1e3a5f" />
+        </mesh>
+        <mesh position={[0.15, 0.33, 0]} castShadow>
+          <cylinderGeometry args={[0.09, 0.09, 0.66, 8]} />
+          <meshStandardMaterial color="#1e3a5f" />
+        </mesh>
+
+        {/* Shinigami uniform */}
+        <mesh position={[0, 0.9, 0]} castShadow>
+          <cylinderGeometry args={[0.44, 0.49, 1.12, 10]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.7} />
+        </mesh>
+        {/* White captain haori over uniform */}
+        <mesh position={[0, 0.9, -0.01]} castShadow>
+          <cylinderGeometry args={[0.56, 0.6, 1.14, 10]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.6} transparent opacity={0.92} />
+        </mesh>
+        {/* Haori wide shoulder pads */}
+        <mesh position={[-0.54, 1.25, 0]} rotation={[0, 0, 0.2]}>
+          <boxGeometry args={[0.22, 0.14, 0.42]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.5} />
+        </mesh>
+        <mesh position={[0.54, 1.25, 0]} rotation={[0, 0, -0.2]}>
+          <boxGeometry args={[0.22, 0.14, 0.42]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.5} />
+        </mesh>
+
+        {/* Arms */}
+        <mesh position={[-0.56, 1.0, 0]} rotation={[0, 0, Math.PI / 7]} castShadow>
+          <cylinderGeometry args={[0.09, 0.08, 0.62, 8]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.6} />
+        </mesh>
+        <mesh position={[0.56, 1.0, 0]} rotation={[0, 0, -Math.PI / 7]} castShadow>
+          <cylinderGeometry args={[0.09, 0.08, 0.62, 8]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.6} />
+        </mesh>
+
+        {/* Head */}
+        <mesh position={[0, 1.64, 0]} castShadow>
+          <sphereGeometry args={[0.29, 14, 14]} />
+          <meshStandardMaterial color="#D4A574" roughness={0.5} />
+        </mesh>
+
+        {/* Swept-back brown hair */}
+        <mesh position={[0, 1.8, -0.08]} rotation={[-0.45, 0, 0]}>
+          <boxGeometry args={[0.38, 0.22, 0.42]} />
+          <meshStandardMaterial color="#92400e" roughness={0.75} />
+        </mesh>
+        <mesh position={[-0.17, 1.74, -0.22]} rotation={[-0.3, 0.25, 0.1]}>
+          <cylinderGeometry args={[0.07, 0.04, 0.32, 6]} />
+          <meshStandardMaterial color="#78350f" roughness={0.8} />
+        </mesh>
+        <mesh position={[0.17, 1.74, -0.22]} rotation={[-0.3, -0.25, -0.1]}>
+          <cylinderGeometry args={[0.07, 0.04, 0.32, 6]} />
+          <meshStandardMaterial color="#78350f" roughness={0.8} />
+        </mesh>
+
+        {/* Glasses — left lens */}
+        <mesh position={[-0.1, 1.65, 0.275]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.056, 0.012, 6, 12]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.95} emissive="#60a5fa" emissiveIntensity={0.6} />
+        </mesh>
+        {/* Glasses — right lens */}
+        <mesh position={[0.1, 1.65, 0.275]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.056, 0.012, 6, 12]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.95} emissive="#60a5fa" emissiveIntensity={0.6} />
+        </mesh>
+        {/* Glasses — bridge */}
+        <mesh position={[0, 1.65, 0.276]}>
+          <boxGeometry args={[0.09, 0.013, 0.013]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.9} />
+        </mesh>
+
+        {/* Eyes — cold grey */}
+        <mesh position={[-0.1, 1.65, 0.27]}>
+          <sphereGeometry args={[0.035, 6, 6]} />
+          <meshStandardMaterial color="#475569" emissive="#60a5fa" emissiveIntensity={0.8} />
+        </mesh>
+        <mesh position={[0.1, 1.65, 0.27]}>
+          <sphereGeometry args={[0.035, 6, 6]} />
+          <meshStandardMaterial color="#475569" emissive="#60a5fa" emissiveIntensity={0.8} />
+        </mesh>
+
+        {/* Kyōka Suigetsu — shimmering blade */}
+        <mesh ref={bladeRef} position={[0.5, 0.75, 0.15]} rotation={[0.1, 0.1, -Math.PI / 7]}>
+          <boxGeometry args={[0.046, 1.0, 0.03]} />
+          <meshStandardMaterial color="#cbd5e1" metalness={1.0} roughness={0.08} emissive="#60a5fa" emissiveIntensity={0.8} />
+        </mesh>
+        {/* Blade guard */}
+        <mesh position={[0.5, 0.32, 0.15]} rotation={[0.1, 0.1, -Math.PI / 7]}>
+          <boxGeometry args={[0.12, 0.04, 0.06]} />
+          <meshStandardMaterial color="#374151" metalness={0.9} />
+        </mesh>
+
+        {/* Spiritual pressure ring — pulses */}
+        <mesh ref={pressureRef} position={[0, 1.0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.65, 0.82, 28]} />
+          <meshBasicMaterial color="#60a5fa" transparent opacity={0.14} />
+        </mesh>
+        <mesh position={[0, 1.0, 0]} rotation={[-Math.PI / 2, 0, Math.PI / 6]}>
+          <ringGeometry args={[1.0, 1.12, 28]} />
+          <meshBasicMaterial color="#3b82f6" transparent opacity={0.07} />
+        </mesh>
+
+        {/* Reiryoku aura */}
+        <mesh position={[0, 0.9, 0]}>
+          <sphereGeometry args={[1.0, 12, 12]} />
+          <meshBasicMaterial color="#1e3a5f" transparent opacity={0.12} />
+        </mesh>
+      </group>
+
       {/* Platform */}
       <mesh position={[0, 0.1, 0]}>
         <cylinderGeometry args={[1.0, 1.0, 0.2, 8]} />
         <meshStandardMaterial color="#1e293b" metalness={0.8} />
       </mesh>
+      {/* Red raid ground ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.21, 0]}>
+        <ringGeometry args={[0.88, 1.08, 24]} />
+        <meshBasicMaterial color="#EF4444" transparent opacity={0.55} />
+      </mesh>
       {/* Sign */}
-      <mesh position={[0, 3.2, 0]}>
-        <boxGeometry args={[2.2, 0.55, 0.08]} />
+      <mesh position={[0, 3.6, 0]}>
+        <boxGeometry args={[2.5, 0.65, 0.09]} />
         <meshStandardMaterial color="#DC2626" emissive="#DC2626" emissiveIntensity={1.8} />
       </mesh>
     </group>

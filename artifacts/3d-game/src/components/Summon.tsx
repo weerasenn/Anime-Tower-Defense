@@ -7,7 +7,7 @@ import { useGameStore } from '../store/gameStore';
 import { UnitData, GACHA_RATES, RARITY_COLORS, UNITS } from '../data/units';
 
 export default function Summon() {
-  const { profile, setScreen, summonUnit, revealQueue, clearRevealQueue } = useGameStore();
+  const { profile, setScreen, summonUnit, revealQueue, clearRevealQueue, testSummonSecret } = useGameStore();
   const [isAnimating, setIsAnimating] = useState(false);
   const [showReveal, setShowReveal] = useState(false);
   const [revealedUnits, setRevealedUnits] = useState<UnitData[]>([]);
@@ -102,6 +102,16 @@ export default function Summon() {
 
       {/* Summon buttons */}
       <div className="summon-buttons">
+        <button
+          className="summon-btn summon-btn-test"
+          onClick={() => { if (!isAnimating) { setIsAnimating(true); setTimeout(() => { testSummonSecret(); setIsAnimating(false); }, 400); } }}
+          disabled={isAnimating}
+          title="Dev: Force a Secret pull"
+        >
+          <div className="summon-btn-label">🧪 TEST</div>
+          <div className="summon-btn-sub" style={{ fontSize: 14 }}>SECRET</div>
+          <div className="summon-btn-cost" style={{ color: '#E879F9' }}>FREE</div>
+        </button>
         <SummonButton
           label="COIN SUMMON"
           sublabel="×1"
