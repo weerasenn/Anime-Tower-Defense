@@ -92,6 +92,21 @@ artifacts/3d-game/
 - Madara Uchiha (wave 10, 18k HP)
 - Doomsday (wave 20, 30k HP)
 
+## Achievement System
+- 11 achievements tracked in persisted store: `first-summon`, `multi-summon`, `mythic-pull`, `secret-pull`, `collector-5`, `collector-10`, `wave-5`, `wave-10`, `wave-20`, `first-boss`, `auto-equip`
+- Toast notifications slide in from bottom-right when unlocked (`AchievementToast.tsx`)
+- `achievements: string[]` persisted to localStorage; `newAchievements: string[]` is transient queue for toasts
+
+## New Features (latest batch)
+- **Boss wave cinematic**: 3.5s animated overlay announces boss name/color when a boss wave starts
+- **Wave preview panel**: Tap "Wave N" button between waves to see next wave composition (enemy types, counts, boss)
+- **Kill counter**: Live 💀 counter in HUD showing kills this wave
+- **3× speed toggle**: Speed cycles 1× → 2× → 3× (3× shows red styling)
+- **Auto-equip**: New units from summon auto-fill first empty squad slot
+- **Improved enemy models**: Each enemy type has a distinct 3D silhouette (grunt/runner/brute/mage-enemy/armored/elite); bosses are full humanoid with shoulder spikes
+- **Enemy HP bars**: Per-enemy HP bar floats above each non-boss enemy in 3D
+- **Game over screen**: Defeat card shows waves survived, final score, kills; "Play Again" restarts same mode
+
 ## Controls
 - **Desktop**: WASD / Arrow Keys to move, E to interact
 - **Mobile**: Virtual joystick (bottom-left), tap interact button (appears near NPCs)

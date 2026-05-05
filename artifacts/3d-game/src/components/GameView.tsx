@@ -114,84 +114,246 @@ function GameFloor({ onCellClick, selectedUnitId }: { onCellClick: (x: number, z
 }
 
 // ============================================================
+// Enemy body — each type has a distinctive silhouette
+// ============================================================
+function EnemyBody({ enemyId, color, auraColor, isBoss, bossPhase, geomSize }: {
+  enemyId: string; color: string; auraColor: string;
+  isBoss?: boolean; bossPhase?: 1 | 2; geomSize: number;
+}) {
+  const mat = (c: string, em: string, ei: number, r = 0.3, m = 0.2) => (
+    <meshStandardMaterial color={c} emissive={em} emissiveIntensity={ei} roughness={r} metalness={m} />
+  );
+
+  if (isBoss) return (
+    <>
+      <mesh position={[-geomSize*0.18, -geomSize*0.35, 0]}>
+        <boxGeometry args={[geomSize*0.3, geomSize*0.5, geomSize*0.3]} />
+        {mat(color, auraColor, bossPhase === 2 ? 2.0 : 1.2, 0.2, 0.8)}
+      </mesh>
+      <mesh position={[geomSize*0.18, -geomSize*0.35, 0]}>
+        <boxGeometry args={[geomSize*0.3, geomSize*0.5, geomSize*0.3]} />
+        {mat(color, auraColor, bossPhase === 2 ? 2.0 : 1.2, 0.2, 0.8)}
+      </mesh>
+      <mesh position={[0, geomSize*0.15, 0]}>
+        <boxGeometry args={[geomSize*0.9, geomSize*0.7, geomSize*0.55]} />
+        {mat(color, auraColor, bossPhase === 2 ? 1.5 : 0.8, 0.2, 0.8)}
+      </mesh>
+      <mesh position={[0, geomSize*0.67, 0]}>
+        <boxGeometry args={[geomSize*0.55, geomSize*0.5, geomSize*0.5]} />
+        {mat(color, auraColor, bossPhase === 2 ? 2.0 : 1.2, 0.1, 0.9)}
+      </mesh>
+      {[-1, 1].map(s => (
+        <mesh key={s} position={[s * geomSize * 0.68, geomSize*0.22, 0]}>
+          <coneGeometry args={[geomSize*0.15, geomSize*0.4, 5]} />
+          {mat(auraColor, auraColor, 2.5, 0.1, 1.0)}
+        </mesh>
+      ))}
+      <mesh position={[0, geomSize * 0.5 + 0.3, 0]}>
+        <coneGeometry args={[geomSize * 0.3, 0.5, 6]} />
+        {mat(auraColor, auraColor, 1.5, 0.1, 0.5)}
+      </mesh>
+      {bossPhase === 2 && [0, 1, 2, 3].map(i => (
+        <mesh key={i} position={[
+          Math.cos(i * Math.PI / 2) * geomSize * 0.6,
+          geomSize * 0.3,
+          Math.sin(i * Math.PI / 2) * geomSize * 0.6,
+        ]}>
+          <coneGeometry args={[0.1, 0.4, 4]} />
+          <meshStandardMaterial color="#EF4444" emissive="#EF4444" emissiveIntensity={2} />
+        </mesh>
+      ))}
+    </>
+  );
+
+  switch (enemyId) {
+    case 'grunt': return (
+      <>
+        <mesh position={[0, -geomSize*0.18, 0]}>
+          <boxGeometry args={[geomSize*0.72, geomSize*0.62, geomSize*0.52]} />
+          {mat(color, auraColor, 0.4, 0.5, 0.1)}
+        </mesh>
+        <mesh position={[0, geomSize*0.36, 0]}>
+          <sphereGeometry args={[geomSize*0.32, 8, 8]} />
+          {mat(color, auraColor, 0.3, 0.5, 0)}
+        </mesh>
+        <mesh position={[0, geomSize*0.38, geomSize*0.3]}>
+          <boxGeometry args={[geomSize*0.24, geomSize*0.07, 0.02]} />
+          <meshStandardMaterial color="#EF4444" emissive="#EF4444" emissiveIntensity={2} />
+        </mesh>
+      </>
+    );
+    case 'runner': return (
+      <>
+        <mesh position={[0, -geomSize*0.05, 0]}>
+          <cylinderGeometry args={[geomSize*0.18, geomSize*0.2, geomSize*0.75, 8]} />
+          {mat(color, auraColor, 0.5, 0.3, 0.3)}
+        </mesh>
+        <mesh position={[0, geomSize*0.5, 0]}>
+          <sphereGeometry args={[geomSize*0.26, 8, 8]} />
+          {mat(color, auraColor, 0.4, 0.3, 0)}
+        </mesh>
+        <mesh position={[0, geomSize*0.24, geomSize*0.15]} rotation={[0.4, 0, 0]}>
+          <boxGeometry args={[geomSize*0.42, geomSize*0.12, geomSize*0.1]} />
+          {mat(auraColor, auraColor, 1.5, 0.2, 0)}
+        </mesh>
+      </>
+    );
+    case 'brute': return (
+      <>
+        <mesh position={[0, -geomSize*0.05, 0]}>
+          <boxGeometry args={[geomSize*1.1, geomSize*0.9, geomSize*0.8]} />
+          {mat(color, auraColor, 0.3, 0.7, 0.3)}
+        </mesh>
+        <mesh position={[0, geomSize*0.62, 0]}>
+          <boxGeometry args={[geomSize*0.42, geomSize*0.37, geomSize*0.42]} />
+          {mat(color, auraColor, 0.2, 0.7, 0.1)}
+        </mesh>
+        {[-1, 1].map(s => (
+          <mesh key={s} position={[s * geomSize * 0.72, geomSize*0.25, 0]}>
+            <boxGeometry args={[geomSize*0.3, geomSize*0.22, geomSize*0.55]} />
+            {mat('#78716C', '#A8A29E', 0.5, 0.4, 0.5)}
+          </mesh>
+        ))}
+      </>
+    );
+    case 'mage-enemy': return (
+      <>
+        <mesh position={[0, -geomSize*0.1, 0]}>
+          <coneGeometry args={[geomSize*0.4, geomSize*0.85, 8]} />
+          {mat(color, auraColor, 0.8, 0.2, 0.1)}
+        </mesh>
+        <mesh position={[0, geomSize*0.44, 0]}>
+          <sphereGeometry args={[geomSize*0.28, 8, 8]} />
+          {mat(color, auraColor, 0.5, 0.2, 0)}
+        </mesh>
+        <mesh position={[0, geomSize*0.74, 0]}>
+          <coneGeometry args={[geomSize*0.24, geomSize*0.45, 6]} />
+          {mat(auraColor, auraColor, 1.5, 0.1, 0)}
+        </mesh>
+        <mesh position={[geomSize*0.52, geomSize*0.32, 0]}>
+          <sphereGeometry args={[geomSize*0.16, 8, 8]} />
+          <meshStandardMaterial color={auraColor} emissive={auraColor} emissiveIntensity={3} />
+        </mesh>
+      </>
+    );
+    case 'armored': return (
+      <>
+        <mesh position={[0, -geomSize*0.05, 0]}>
+          <boxGeometry args={[geomSize*0.85, geomSize*0.8, geomSize*0.65]} />
+          {mat('#1C1917', '#44403C', 0.3, 0.1, 0.9)}
+        </mesh>
+        <mesh position={[0, geomSize*0.54, 0]}>
+          <boxGeometry args={[geomSize*0.52, geomSize*0.5, geomSize*0.52]} />
+          {mat('#1C1917', '#44403C', 0.2, 0.05, 0.95)}
+        </mesh>
+        <mesh position={[0, geomSize*0.57, geomSize*0.27]}>
+          <boxGeometry args={[geomSize*0.4, geomSize*0.08, 0.02]} />
+          {mat(auraColor, auraColor, 2.5, 0.1, 0)}
+        </mesh>
+        <mesh position={[-geomSize*0.6, 0, geomSize*0.1]} rotation={[0, 0.3, 0]}>
+          <boxGeometry args={[geomSize*0.12, geomSize*0.7, geomSize*0.55]} />
+          {mat('#374151', '#4B5563', 0.4, 0.2, 0.7)}
+        </mesh>
+      </>
+    );
+    case 'elite': return (
+      <>
+        <mesh position={[0, 0, 0]}>
+          <cylinderGeometry args={[geomSize*0.28, geomSize*0.32, geomSize, 8]} />
+          {mat(color, auraColor, 0.6, 0.15, 0.7)}
+        </mesh>
+        <mesh position={[0, geomSize*0.66, 0]}>
+          <sphereGeometry args={[geomSize*0.3, 10, 10]} />
+          {mat(color, auraColor, 0.7, 0.1, 0.9)}
+        </mesh>
+        {[-1, 1].map(s => (
+          <mesh key={s} position={[s * geomSize * 0.6, geomSize*0.1, 0]} rotation={[0, 0, s * 0.5]}>
+            <boxGeometry args={[geomSize*0.45, geomSize*0.65, geomSize*0.04]} />
+            <meshStandardMaterial color={auraColor} emissive={auraColor} emissiveIntensity={1.5} transparent opacity={0.7} />
+          </mesh>
+        ))}
+        {[0, 1, 2].map(i => (
+          <mesh key={i} position={[Math.cos(i * 2.1) * geomSize * 0.2, geomSize * 0.86, Math.sin(i * 2.1) * geomSize * 0.2]}>
+            <coneGeometry args={[geomSize*0.06, geomSize*0.2, 4]} />
+            {mat(auraColor, auraColor, 2.0, 0.1, 1.0)}
+          </mesh>
+        ))}
+      </>
+    );
+    default: return (
+      <mesh>
+        <boxGeometry args={[geomSize * 0.8, geomSize, geomSize * 0.8]} />
+        {mat(color, auraColor, 0.5, 0.3, 0.2)}
+      </mesh>
+    );
+  }
+}
+
+// ============================================================
 // Enemy unit in 3D
 // ============================================================
 function EnemyMesh({ enemyId, progress, hp, maxHp, isBoss, bossPhase, size, color, auraColor, slowFactor }: {
   enemyId: string; progress: number; hp: number; maxHp: number;
   isBoss?: boolean; bossPhase?: 1 | 2; size: number; color: string; auraColor: string; slowFactor?: number;
 }) {
-  const meshRef = useRef<THREE.Mesh>(null!);
+  const bodyRef = useRef<THREE.Group>(null!);
+  const hpBarRef = useRef<THREE.Group>(null!);
   const glowRef = useRef<THREE.Mesh>(null!);
-  const [pos] = useState<[number, number]>([0, 0]);
 
   useFrame((_, delta) => {
     const [wx, wz] = getPositionOnPath(progress);
-
-    if (meshRef.current) {
-      meshRef.current.position.set(wx, size * 0.5 + (isBoss ? 0.2 : 0), wz);
-      meshRef.current.rotation.y += delta * (isBoss ? 0.5 : 1.5);
+    const yOff = size * 0.5 + (isBoss ? 0.2 : 0);
+    if (bodyRef.current) {
+      bodyRef.current.position.set(wx, yOff, wz);
+      bodyRef.current.rotation.y += delta * (isBoss ? 0.5 : 1.5);
+    }
+    if (hpBarRef.current) {
+      hpBarRef.current.position.set(wx, yOff, wz);
     }
     if (glowRef.current) {
-      glowRef.current.position.set(wx, size * 0.5 + (isBoss ? 0.2 : 0), wz);
-      const t = Date.now() / 1000;
-      const scale = 1 + Math.sin(t * 3) * 0.1;
-      glowRef.current.scale.setScalar(scale);
+      glowRef.current.position.set(wx, yOff, wz);
+      glowRef.current.scale.setScalar(1 + Math.sin(Date.now() / 333) * 0.1);
     }
   });
 
   const hpPct = hp / maxHp;
   const hpColor = hpPct > 0.6 ? '#4ADE80' : hpPct > 0.3 ? '#F59E0B' : '#EF4444';
   const isFrozen = (slowFactor || 0) > 0;
-
   const geomSize = size * (isBoss ? 1.2 : 0.8);
+  const bc = isFrozen ? '#BAE6FD' : color;
+  const ec = isFrozen ? '#60A5FA' : auraColor;
 
   return (
     <group>
-      {/* Glow sphere */}
+      {/* Glow halo */}
       <mesh ref={glowRef}>
-        <sphereGeometry args={[geomSize * 0.7, 8, 8]} />
+        <sphereGeometry args={[geomSize * 0.72, 8, 8]} />
         <meshStandardMaterial
-          color={isFrozen ? '#7DD3FC' : color}
-          emissive={isFrozen ? '#7DD3FC' : auraColor}
+          color={bc} emissive={ec}
           emissiveIntensity={isBoss ? (bossPhase === 2 ? 2.0 : 1.5) : 1.0}
-          transparent
-          opacity={0.3}
+          transparent opacity={0.28}
         />
       </mesh>
 
-      {/* Body */}
-      <mesh ref={meshRef} castShadow>
-        {isBoss
-          ? <boxGeometry args={[geomSize, geomSize, geomSize]} />
-          : <boxGeometry args={[geomSize * 0.8, geomSize, geomSize * 0.8]} />
-        }
-        <meshStandardMaterial
-          color={isFrozen ? '#BAE6FD' : color}
-          emissive={isFrozen ? '#60A5FA' : auraColor}
-          emissiveIntensity={isBoss ? (bossPhase === 2 ? 1.5 : 0.8) : 0.5}
-          roughness={0.3}
-          metalness={isBoss ? 0.8 : 0.2}
+      {/* Rotating body */}
+      <group ref={bodyRef}>
+        <EnemyBody
+          enemyId={enemyId} color={bc} auraColor={ec}
+          isBoss={isBoss} bossPhase={bossPhase} geomSize={geomSize}
         />
-      </mesh>
+      </group>
 
-      {/* Boss crown */}
-      {isBoss && (
-        <group>
-          <mesh position={[0, geomSize * 0.5 + 0.3, 0]}>
-            <coneGeometry args={[geomSize * 0.3, 0.5, 6]} />
-            <meshStandardMaterial color={auraColor} emissive={auraColor} emissiveIntensity={1.5} />
+      {/* HP bar — non-rotating */}
+      {!isBoss && (
+        <group ref={hpBarRef}>
+          <mesh position={[0, geomSize * 0.94, 0]}>
+            <boxGeometry args={[0.55, 0.065, 0.02]} />
+            <meshStandardMaterial color="#111827" />
           </mesh>
-          {/* Phase 2 extra spikes */}
-          {bossPhase === 2 && [0, 1, 2, 3].map(i => (
-            <mesh key={i} position={[
-              Math.cos(i * Math.PI / 2) * geomSize * 0.6,
-              geomSize * 0.3,
-              Math.sin(i * Math.PI / 2) * geomSize * 0.6,
-            ]}>
-              <coneGeometry args={[0.1, 0.4, 4]} />
-              <meshStandardMaterial color="#EF4444" emissive="#EF4444" emissiveIntensity={2} />
-            </mesh>
-          ))}
+          <mesh position={[(hpPct - 1) * 0.275, geomSize * 0.94, 0.01]}>
+            <boxGeometry args={[0.55 * hpPct, 0.065, 0.02]} />
+            <meshStandardMaterial color={hpColor} emissive={hpColor} emissiveIntensity={0.7} />
+          </mesh>
         </group>
       )}
     </group>

@@ -1,0 +1,200 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LeBron James - Lakers Edition</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #020205; font-family: 'Arial Black', sans-serif; touch-action: none; }
+        #joystick-zone { position: absolute; bottom: 60px; left: 50px; width: 130px; height: 130px; z-index: 20; }
+        #joystick-base { width: 100%; height: 100%; background: rgba(255,255,255,0.05); border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); }
+        #joystick-knob { position: absolute; width: 55px; height: 55px; background: #fff; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .hud { position: fixed; top: 20px; left: 20px; color: #FDB927; font-size: 18px; text-shadow: 2px 2px #552583; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div class="hud">KING JAMES: LAKERS MODE</div>
+    <div id="joystick-zone"><div id="joystick-base"></div><div id="joystick-knob"></div></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, clock, toonGradient;
+        let playerGroup, playerSkeleton, ball;
+        let move = { x: 0, z: 0, active: false };
+        
+        // Target position for the ball physics
+        let ballTarget = new THREE.Vector3();
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x05050a);
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+            sun.position.set(50, 100, 50);
+            scene.add(sun);
+
+            // Toon Shader Texture
+            const canvas = document.createElement('canvas');
+            canvas.width = 3; canvas.height = 1;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#333'; ctx.fillRect(0,0,1,1);
+            ctx.fillStyle = '#888'; ctx.fillRect(1,0,1,1);
+            ctx.fillStyle = '#fff'; ctx.fillRect(2,0,1,1);
+            toonGradient = new THREE.CanvasTexture(canvas);
+            toonGradient.magFilter = THREE.NearestFilter;
+
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshToonMaterial({ color: 0x0a0a12, gradientMap: toonGradient }));
+            floor.rotation.x = -Math.PI/2;
+            scene.add(floor);
+
+            buildLeBronLakers();
+            setupJoystick();
+            
+            clock = new THREE.Clock();
+            animate();
+        }
+
+        function buildLeBronLakers() {
+            playerGroup = new THREE.Group();
+            playerSkeleton = { hips: new THREE.Group(), lLeg: new THREE.Group(), rLeg: new THREE.Group() };
+
+            const skin = new THREE.MeshToonMaterial({ color: 0x4d3324, gradientMap: toonGradient });
+            const lakersPurple = new THREE.MeshToonMaterial({ color: 0x552583, gradientMap: toonGradient });
+            const lakersGold = new THREE.MeshToonMaterial({ color: 0xFDB927, gradientMap: toonGradient });
+            const beardMat = new THREE.MeshToonMaterial({ color: 0x111111, gradientMap: toonGradient });
+
+            playerSkeleton.hips.position.y = 12;
+            playerGroup.add(playerSkeleton.hips);
+
+            // --- THE LAKERS JACKET ---
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(6.5, 9, 4), lakersPurple);
+            torso.position.y = 4.5;
+            playerSkeleton.hips.add(torso);
+
+            // Gold Trim/Shoulders
+            const shoulderL = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 4.2), lakersGold);
+            shoulderL.position.set(-3, 6, 0);
+            playerSkeleton.hips.add(shoulderL);
+
+            const shoulderR = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 4.2), lakersGold);
+            shoulderR.position.set(3, 6, 0);
+            playerSkeleton.hips.add(shoulderR);
+
+            // --- THE HEAD & BEARD ---
+            const head = new THREE.Mesh(new THREE.BoxGeometry(4, 4.5, 4.2), skin);
+            head.position.y = 11;
+            playerSkeleton.hips.add(head);
+
+            // Signature Beard
+            const beard = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2, 2.5), beardMat);
+            beard.position.set(0, 10, 1);
+            playerSkeleton.hips.add(beard);
+
+            const chinBeard = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.5, 2), beardMat);
+            chinBeard.position.set(0, 9, 1);
+            playerSkeleton.hips.add(chinBeard);
+
+            // --- LEGS ---
+            playerSkeleton.lLeg.position.set(-2, 0, 0);
+            playerSkeleton.hips.add(playerSkeleton.lLeg);
+            const ll = new THREE.Mesh(new THREE.BoxGeometry(2.5, 6.5, 2.5), lakersPurple);
+            ll.position.y = -3.25;
+            playerSkeleton.lLeg.add(ll);
+
+            playerSkeleton.rLeg.position.set(2, 0, 0);
+            playerSkeleton.hips.add(playerSkeleton.rLeg);
+            const rl = new THREE.Mesh(new THREE.BoxGeometry(2.5, 6.5, 2.5), lakersPurple);
+            rl.position.y = -3.25;
+            playerSkeleton.rLeg.add(rl);
+
+            // --- BASKETBALL (Tethered to Physics) ---
+            ball = new THREE.Mesh(
+                new THREE.SphereGeometry(2, 16, 16),
+                new THREE.MeshToonMaterial({ color: 0xee6730, gradientMap: toonGradient })
+            );
+            ball.position.set(10, 10, 0);
+            scene.add(ball);
+
+            scene.add(playerGroup);
+        }
+
+        function setupJoystick() {
+            const z = document.getElementById('joystick-zone'), k = document.getElementById('joystick-knob');
+            const h = (e) => {
+                if(!move.active) return;
+                const t = e.touches ? e.touches[0] : e;
+                const r = z.getBoundingClientRect();
+                let dx = t.clientX - (r.left + 65), dy = t.clientY - (r.top + 65);
+                const d = Math.sqrt(dx*dx + dy*dy);
+                if(d > 50) { dx *= 50/d; dy *= 50/d; }
+                k.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+                move.x = dx / 50; move.z = dy / 50;
+            };
+            z.addEventListener('touchstart', (e) => { move.active = true; h(e); });
+            window.addEventListener('touchmove', h);
+            window.addEventListener('touchend', () => { move.active = false; move.x = 0; move.z = 0; k.style.transform = `translate(-50%, -50%)`; });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta(), t = clock.getElapsedTime();
+
+            if(playerGroup) {
+                // FIXED MOVEMENT: Multiplied by speed and delta time
+                const speed = 90;
+                playerGroup.position.x += move.x * speed * dt;
+                playerGroup.position.z += move.z * speed * dt;
+
+                if(Math.abs(move.x) > 0.05 || Math.abs(move.z) > 0.05) {
+                    playerGroup.rotation.y = Math.atan2(move.x, move.z);
+                    playerSkeleton.lLeg.rotation.x = Math.sin(t * 16) * 0.8;
+                    playerSkeleton.rLeg.rotation.x = -Math.sin(t * 16) * 0.8;
+                    playerSkeleton.hips.position.y = 12 + Math.abs(Math.sin(t * 16)) * 0.6;
+
+                    // Ball follows in "Orbit Mode" while moving
+                    ballTarget.set(
+                        playerGroup.position.x + Math.sin(t * 8) * 8,
+                        10 + Math.abs(Math.sin(t * 12)) * 10,
+                        playerGroup.position.z + Math.cos(t * 8) * 8
+                    );
+                } else {
+                    playerSkeleton.lLeg.rotation.x = 0;
+                    playerSkeleton.rLeg.rotation.x = 0;
+                    playerSkeleton.hips.position.y = 12 + Math.sin(t * 2) * 0.3;
+
+                    // Ball follows in "Idle Mode" (Float near shoulder)
+                    ballTarget.set(
+                        playerGroup.position.x + 8,
+                        15 + Math.sin(t * 3) * 2,
+                        playerGroup.position.z - 2
+                    );
+                }
+
+                // Smooth Ball Follow Physics (Lerp)
+                ball.position.lerp(ballTarget, 0.1); 
+                ball.rotation.y += 0.1;
+
+                // Camera follow
+                camera.position.lerp(new THREE.Vector3(playerGroup.position.x, 80, playerGroup.position.z + 140), 0.1);
+                camera.lookAt(playerGroup.position.x, 15, playerGroup.position.z);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
+
+
+```

@@ -86,6 +86,7 @@ export interface GameState {
   gold: number;
   wave: number;
   score: number;
+  killsThisWave: number;
   enemies: LiveEnemy[];
   placedUnits: PlacedUnit[];
   isWaveActive: boolean;
@@ -115,6 +116,8 @@ interface GameStoreState {
 
   // Summon reveal
   revealQueue: UnitData[];
+  achievements: string[];
+  newAchievements: string[];
 
   // Live game
   game: GameState;
@@ -136,6 +139,9 @@ interface GameStoreState {
   upgradeUnit: (unitId: string) => boolean;
   evolveUnit: (unitId: string) => boolean;
   getEquippedUnits: () => (OwnedUnit | null)[];
+
+  // Achievements
+  dismissAchievement: (id: string) => void;
 
   // Summon
   summonUnit: (type: 'coin' | 'gem' | 'multi') => boolean;
@@ -233,6 +239,7 @@ function generateInitialGame(): GameState {
     gold: 300,
     wave: 0,
     score: 0,
+    killsThisWave: 0,
     enemies: [],
     placedUnits: [],
     isWaveActive: false,
@@ -267,6 +274,8 @@ export const useGameStore = create<GameStoreState>()(
       ownedUnits: [],
       equippedUnitIds: [null, null, null, null, null],
       revealQueue: [],
+      achievements: [],
+      newAchievements: [],
 
       game: generateInitialGame(),
 
@@ -302,11 +311,15 @@ export const useGameStore = create<GameStoreState>()(
               ),
             };
           }
+          const emptySlot = s.equippedUnitIds.indexOf(null);
           return {
             ownedUnits: [
               ...s.ownedUnits,
-              { unitId: unit.id, level: 1, experience: 0, shards: 0, equipped: false },
+              { unitId: unit.id, level: 1, experience: 0, shards: 0, equipped: emptySlot !== -1 },
             ],
+            equippedUnitIds: emptySlot !== -1
+              ? s.equippedUnitIds.map((id, i) => i === emptySlot ? unit.id : id)
+              : s.equippedUnitIds,
           };
         });
       },
@@ -393,11 +406,32 @@ export const useGameStore = create<GameStoreState>()(
           addUnit(pulled);
         }
 
-        set(s => ({ revealQueue: results, profile: { ...s.profile, summonPity: pity } as any }));
+        const currentAchievements = get().achievements;
+        const ownedCount = get().ownedUnits.length;
+        const toUnlockSummon: string[] = [];
+        if (!currentAchievements.includes('first-summon')) toUnlockSummon.push('first-summon');
+        if (type === 'multi' && !currentAchievements.includes('multi-summon')) toUnlockSummon.push('multi-summon');
+        if (results.some(r => r.rarity === 'mythic') && !currentAchievements.includes('mythic-pull')) toUnlockSummon.push('mythic-pull');
+        if (results.some(r => r.rarity === 'secret') && !currentAchievements.includes('secret-pull')) toUnlockSummon.push('secret-pull');
+        if (ownedCount >= 5 && !currentAchievements.includes('collector-5')) toUnlockSummon.push('collector-5');
+        if (ownedCount >= 10 && !currentAchievements.includes('collector-10')) toUnlockSummon.push('collector-10');
+
+        set(s => ({
+          revealQueue: results,
+          profile: { ...s.profile, summonPity: pity } as any,
+          ...(toUnlockSummon.length > 0 ? {
+            achievements: [...s.achievements, ...toUnlockSummon],
+            newAchievements: [...s.newAchievements, ...toUnlockSummon],
+          } : {}),
+        }));
         return true;
       },
 
       clearRevealQueue: () => set({ revealQueue: [] }),
+
+      dismissAchievement: (id) => {
+        set(s => ({ newAchievements: s.newAchievements.filter(a => a !== id) }));
+      },
 
       testSummonSecret: () => {
         const { addUnit } = get();
@@ -638,7 +672,10 @@ export const useGameStore = create<GameStoreState>()(
           return { ...pu, lastAttackTime: currentTime };
         });
 
-        // Remove dead enemies
+        // Remove dead enemies — count kills
+        const killedThisFrame = updatedEnemies.filter(e => e.hp <= 0);
+        const killsGained = killedThisFrame.length;
+        const bossKilledThisFrame = killedThisFrame.some(e => e.isBoss);
         const aliveEnemies = updatedEnemies.filter(e => e.hp > 0);
 
         // Clean old effects (> 0.5s)
@@ -653,36 +690,49 @@ export const useGameStore = create<GameStoreState>()(
         const newLives = Math.max(0, game.lives - livesLost);
         const isGameOver = newLives <= 0;
 
-        let updatedProfile = {};
-        if (waveEnded || isGameOver) {
-          updatedProfile = {
-            profile: {
-              ...get().profile,
-              totalWaves: get().profile.totalWaves + (waveEnded ? 1 : 0),
-              highScore: Math.max(get().profile.highScore, game.score + scoreGained),
-            },
-          };
+        // Achievement checks
+        const curAch = get().achievements;
+        const toUnlockGame: string[] = [];
+        if (waveEnded) {
+          const w = game.wave;
+          if (w >= 5 && !curAch.includes('wave-5')) toUnlockGame.push('wave-5');
+          if (w >= 10 && !curAch.includes('wave-10')) toUnlockGame.push('wave-10');
+          if (w >= 20 && !curAch.includes('wave-20')) toUnlockGame.push('wave-20');
         }
+        if (bossKilledThisFrame && !curAch.includes('first-boss')) toUnlockGame.push('first-boss');
 
-        set(s => ({
-          game: {
-            ...s.game,
-            enemies: aliveEnemies,
-            placedUnits: updatedPlacedUnits,
-            spawnQueue: newSpawnQueue,
-            lives: newLives,
-            gold: s.game.gold + goldGained,
-            score: s.game.score + scoreGained,
-            isWaveActive: waveEnded ? false : s.game.isWaveActive,
-            isGameOver,
-            effects: liveEffects,
-            floatingTexts: liveTexts,
-          },
-          profile: {
-            ...s.profile,
-            coins: s.profile.coins + Math.floor(goldGained * 0.1),
-          },
-        }));
+        set(s => {
+          const profileUpdates = (waveEnded || isGameOver) ? {
+            totalWaves: s.profile.totalWaves + (waveEnded ? 1 : 0),
+            totalKills: (s.profile.totalKills || 0) + killsGained,
+            highScore: Math.max(s.profile.highScore, s.game.score + scoreGained),
+          } : {};
+          return {
+            game: {
+              ...s.game,
+              enemies: aliveEnemies,
+              placedUnits: updatedPlacedUnits,
+              spawnQueue: newSpawnQueue,
+              lives: newLives,
+              gold: s.game.gold + goldGained,
+              score: s.game.score + scoreGained,
+              killsThisWave: waveEnded ? 0 : s.game.killsThisWave + killsGained,
+              isWaveActive: waveEnded ? false : s.game.isWaveActive,
+              isGameOver,
+              effects: liveEffects,
+              floatingTexts: liveTexts,
+            },
+            profile: {
+              ...s.profile,
+              coins: s.profile.coins + Math.floor(goldGained * 0.1),
+              ...profileUpdates,
+            },
+            ...(toUnlockGame.length > 0 ? {
+              achievements: [...s.achievements, ...toUnlockGame],
+              newAchievements: [...s.newAchievements, ...toUnlockGame],
+            } : {}),
+          };
+        });
       },
 
       placeUnit: (unitId, gridX, gridZ) => {
@@ -827,6 +877,7 @@ export const useGameStore = create<GameStoreState>()(
         profile: state.profile,
         ownedUnits: state.ownedUnits,
         equippedUnitIds: state.equippedUnitIds,
+        achievements: state.achievements,
       }),
     }
   )
