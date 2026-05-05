@@ -6,10 +6,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { UnitData, BossData, performSummon, BOSSES, UNITS } from '../data/units';
 import { ENEMIES, generateWave, WaveData } from '../data/enemies';
+import { rollTrait, DAILY_REWARDS } from '../data/traits';
 
 // ------ Types ------
 
-export type GameScreen = 'lobby' | 'summon' | 'inventory' | 'shop' | 'modes' | 'game' | 'summon-reveal';
+export type GameScreen = 'lobby' | 'summon' | 'inventory' | 'shop' | 'modes' | 'game' | 'summon-reveal' | 'traits' | 'daily-rewards';
 export type GameMode = 'story' | 'infinite' | 'challenge';
 
 export interface OwnedUnit {
@@ -139,6 +140,18 @@ interface GameStoreState {
   upgradeUnit: (unitId: string) => boolean;
   evolveUnit: (unitId: string) => boolean;
   getEquippedUnits: () => (OwnedUnit | null)[];
+
+  // Traits & Daily
+  ownedTraits: string[];
+  activeTraits: string[];
+  dailyRewardDay: number;
+  lastDailyRewardClaim: number;
+  freeBundleClaimed: boolean;
+  claimDailyReward: () => { coins: number; gems: number; trait?: string } | null;
+  addTrait: (traitId: string) => void;
+  equipTrait: (traitId: string) => void;
+  unequipTrait: (traitId: string) => void;
+  claimFreeBundle: () => void;
 
   // Achievements
   dismissAchievement: (id: string) => void;
@@ -276,6 +289,11 @@ export const useGameStore = create<GameStoreState>()(
       revealQueue: [],
       achievements: [],
       newAchievements: [],
+      ownedTraits: [],
+      activeTraits: [],
+      dailyRewardDay: 1,
+      lastDailyRewardClaim: 0,
+      freeBundleClaimed: false,
 
       game: generateInitialGame(),
 
@@ -431,6 +449,65 @@ export const useGameStore = create<GameStoreState>()(
 
       dismissAchievement: (id) => {
         set(s => ({ newAchievements: s.newAchievements.filter(a => a !== id) }));
+      },
+
+      // ------- Traits & Daily Rewards -------
+      addTrait: (traitId) => {
+        set(s => {
+          if (s.ownedTraits.includes(traitId)) return s;
+          return { ownedTraits: [...s.ownedTraits, traitId] };
+        });
+      },
+
+      equipTrait: (traitId) => {
+        set(s => {
+          if (!s.ownedTraits.includes(traitId)) return s;
+          if (s.activeTraits.includes(traitId)) return s;
+          if (s.activeTraits.length >= 3) return s;
+          return { activeTraits: [...s.activeTraits, traitId] };
+        });
+      },
+
+      unequipTrait: (traitId) => {
+        set(s => ({ activeTraits: s.activeTraits.filter(t => t !== traitId) }));
+      },
+
+      claimDailyReward: () => {
+        const state = get();
+        const now = Date.now();
+        const MS_PER_DAY = 86400000;
+        if (now - (state.lastDailyRewardClaim ?? 0) < MS_PER_DAY) return null;
+
+        const day = ((state.dailyRewardDay ?? 1) - 1) % 7;
+        const reward = DAILY_REWARDS[day];
+        let traitId: string | undefined;
+
+        if (reward.traitRarity) {
+          const trait = rollTrait(reward.traitRarity);
+          traitId = trait.id;
+          get().addTrait(trait.id);
+        }
+
+        set(s => ({
+          profile: {
+            ...s.profile,
+            coins: s.profile.coins + reward.coins,
+            gems: s.profile.gems + reward.gems,
+          },
+          dailyRewardDay: (s.dailyRewardDay ?? 1) + 1,
+          lastDailyRewardClaim: now,
+        }));
+
+        return { coins: reward.coins, gems: reward.gems, trait: traitId };
+      },
+
+      claimFreeBundle: () => {
+        const state = get();
+        if (state.freeBundleClaimed) return;
+        set(s => ({
+          profile: { ...s.profile, coins: s.profile.coins + 2000, gems: s.profile.gems + 100 },
+          freeBundleClaimed: true,
+        }));
       },
 
       testSummonSecret: () => {
@@ -878,6 +955,11 @@ export const useGameStore = create<GameStoreState>()(
         ownedUnits: state.ownedUnits,
         equippedUnitIds: state.equippedUnitIds,
         achievements: state.achievements,
+        ownedTraits: state.ownedTraits,
+        activeTraits: state.activeTraits,
+        dailyRewardDay: state.dailyRewardDay,
+        lastDailyRewardClaim: state.lastDailyRewardClaim,
+        freeBundleClaimed: state.freeBundleClaimed,
       }),
     }
   )

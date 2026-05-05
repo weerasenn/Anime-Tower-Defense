@@ -8,6 +8,8 @@ import Inventory from './components/Inventory';
 import Shop from './components/Shop';
 import Modes from './components/Modes';
 import GameView from './components/GameView';
+import DailyRewards from './components/DailyRewards';
+import Traits from './components/Traits';
 import AchievementToast from './components/AchievementToast';
 import { useGameStore } from './store/gameStore';
 
@@ -22,6 +24,8 @@ export default function App() {
       {screen === 'shop' && <Shop />}
       {screen === 'modes' && <Modes />}
       {screen === 'game' && <GameView />}
+      {screen === 'daily-rewards' && <DailyRewards />}
+      {screen === 'traits' && <Traits />}
       <AchievementToast />
     </div>
   );

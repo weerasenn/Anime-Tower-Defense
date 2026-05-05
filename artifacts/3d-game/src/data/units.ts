@@ -3,7 +3,7 @@
 // Anime character roster with rarities: rare → epic → legendary → mythic → secret
 // ============================================================
 
-export type UnitRarity = 'rare' | 'epic' | 'legendary' | 'mythic' | 'secret';
+export type UnitRarity = 'rare' | 'epic' | 'legendary' | 'mythic' | 'secret' | 'divine';
 export type UnitRole = 'swordsman' | 'tank' | 'fighter' | 'archer' | 'warrior' | 'assassin' | 'support' | 'vanguard' | 'mage' | 'beast';
 
 export interface UnitAbility {
@@ -846,6 +846,40 @@ export interface BossData {
   rewards: { coins: number; gems: number };
 }
 
+// ================================================================
+// DIVINE RARITY — Yuhabana (0.01%) — Transcendent-tier
+// ================================================================
+// Yuhabana is added to the summoning pool but at an astronomically
+// low weight so players feel the thrill of an impossible pull.
+
+// ── Yuhabana is added inline to UNITS above this block ──
+// (Defined here to keep divine units separate from the main roster)
+
+export const DIVINE_UNITS: Record<string, UnitData> = {
+  'yuhabana': {
+    id: 'yuhabana',
+    name: 'Yuhabana',
+    title: 'The Absolute Void — Divine Incarnate',
+    rarity: 'divine',
+    role: 'vanguard',
+    color: '#FFD700',
+    auraColor: '#FFFFFF',
+    trailColor: '#FFD700',
+    stats: { hp: 99999, atk: 9999, range: 6.0, attackSpeed: 2.5, defense: 999 },
+    ability: {
+      name: 'Divine Erasure',
+      description: 'Calls down a pillar of divine light, instantly erasing ALL enemies from existence. Resets after boss kill.',
+      cooldown: 45,
+      effectType: 'supernova',
+      aoeRadius: 12,
+      damageMultiplier: 500,
+    },
+    description: 'A transcendent being who exists beyond all known power systems. Its very presence causes reality to tremble. The only DIVINE-rarity unit in the entire game.',
+    deployCost: 9999,
+    summonWeight: 0.1,
+  },
+};
+
 export const BOSSES: Record<string, BossData> = {
   'boss-orochi': {
     id: 'boss-orochi',
@@ -892,11 +926,12 @@ export const BOSSES: Record<string, BossData> = {
 // GACHA CONFIG
 // ================================================================
 export const GACHA_RATES = {
-  rare: 0.80,
+  rare: 0.7949,
   epic: 0.15,
   legendary: 0.0445,
   mythic: 0.005,
   secret: 0.0005,
+  divine: 0.0001,
 };
 
 export const SUMMON_COSTS = {
@@ -911,6 +946,7 @@ export const RARITY_COLORS: Record<string, string> = {
   legendary: '#F59E0B',
   mythic: '#EF4444',
   secret: '#E879F9',
+  divine: '#FFD700',
 };
 
 export const RARITY_GLOW: Record<string, string> = {
@@ -919,11 +955,21 @@ export const RARITY_GLOW: Record<string, string> = {
   legendary: '#F59E0B44',
   mythic: '#EF444444',
   secret: '#E879F944',
+  divine: '#FFD70066',
 };
 
 // Helper: get all base units by rarity (no evolutions)
 export function getBaseUnitsByRarity(rarity: UnitRarity): UnitData[] {
   return Object.values(UNITS).filter(u => u.rarity === rarity && u.summonWeight > 0);
+}
+
+// Helper: get all units including divine
+export function getAllBaseUnits(): UnitData[] {
+  const normal = Object.values(UNITS).filter(u => u.summonWeight > 0 && !u.evolvesTo?.startsWith('evo') && u.id.split('-').length <= 2);
+  const divine = Object.values(DIVINE_UNITS).filter(u => u.summonWeight > 0);
+  // Actually, filter by not having a number suffix (no stage 2/3)
+  const baseNormal = Object.values(UNITS).filter(u => u.summonWeight > 0 && !u.id.endsWith('-2') && !u.id.endsWith('-3'));
+  return [...baseNormal, ...divine];
 }
 
 // Helper: perform a gacha pull (returns a UnitData)
@@ -934,12 +980,19 @@ export function performSummon(forceMythic = false): UnitData {
     rarity = 'mythic';
   } else {
     const roll = Math.random();
-    const { rare, epic, legendary, mythic, secret } = GACHA_RATES;
-    if (roll < secret) rarity = 'secret';
-    else if (roll < secret + mythic) rarity = 'mythic';
-    else if (roll < secret + mythic + legendary) rarity = 'legendary';
-    else if (roll < secret + mythic + legendary + epic) rarity = 'epic';
+    const { rare, epic, legendary, mythic, secret, divine } = GACHA_RATES;
+    if (roll < divine) rarity = 'divine';
+    else if (roll < divine + secret) rarity = 'secret';
+    else if (roll < divine + secret + mythic) rarity = 'mythic';
+    else if (roll < divine + secret + mythic + legendary) rarity = 'legendary';
+    else if (roll < divine + secret + mythic + legendary + epic) rarity = 'epic';
     else rarity = 'rare';
+  }
+
+  // Check divine pool first
+  if (rarity === 'divine') {
+    const divinePool = Object.values(DIVINE_UNITS);
+    if (divinePool.length > 0) return divinePool[Math.floor(Math.random() * divinePool.length)];
   }
 
   const pool = getBaseUnitsByRarity(rarity);

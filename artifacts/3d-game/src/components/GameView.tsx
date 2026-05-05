@@ -1055,16 +1055,22 @@ function GameTick() {
 }
 
 // ============================================================
-// Camera setup — low isometric 3rd-person view
+// Camera setup — supports 3rd-person and top-down modes
 // ============================================================
-function CameraSetup() {
+function CameraSetup({ topDown }: { topDown: boolean }) {
   const { camera } = useThree();
   useEffect(() => {
-    camera.position.set(0, 8, 9);
-    camera.lookAt(0, 0, -2);
-    (camera as THREE.PerspectiveCamera).fov = 62;
+    if (topDown) {
+      camera.position.set(0, 18, 0.01);
+      camera.lookAt(0, 0, 0);
+      (camera as THREE.PerspectiveCamera).fov = 55;
+    } else {
+      camera.position.set(0, 8, 9);
+      camera.lookAt(0, 0, -2);
+      (camera as THREE.PerspectiveCamera).fov = 62;
+    }
     (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
-  }, [camera]);
+  }, [camera, topDown]);
   return null;
 }
 
@@ -1089,17 +1095,18 @@ function CellHighlight({ x, z, color }: { x: number; z: number; color: string })
 // ============================================================
 // Main 3D Scene
 // ============================================================
-function Scene({ selectedUnitId, hoveredCell, onCellClick, onCellHover }: {
+function Scene({ selectedUnitId, hoveredCell, onCellClick, onCellHover, topDown }: {
   selectedUnitId: string | null;
   hoveredCell: [number, number] | null;
   onCellClick: (x: number, z: number) => void;
   onCellHover: (x: number, z: number) => void;
+  topDown: boolean;
 }) {
   const { game } = useGameStore();
 
   return (
     <>
-      <CameraSetup />
+      <CameraSetup topDown={topDown} />
       <GameTick />
 
       {/* Lighting — brighter so models are visible */}
@@ -1180,6 +1187,7 @@ export default function GameView() {
   const { game, equippedUnitIds, placeUnit, resetGame } = useGameStore();
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
   const [hoveredCell, setHoveredCell] = useState<[number, number] | null>(null);
+  const [topDown, setTopDown] = useState(false);
 
   function handleCellClick(x: number, z: number) {
     if (!selectedUnitId) return;
@@ -1220,8 +1228,19 @@ export default function GameView() {
           hoveredCell={hoveredCell}
           onCellClick={handleCellClick}
           onCellHover={handleCellHover}
+          topDown={topDown}
         />
       </Canvas>
+
+      {/* Camera toggle */}
+      <button
+        className={`camera-toggle-btn ${topDown ? 'top-down' : ''}`}
+        style={{ position: 'absolute', top: 12, right: 12, zIndex: 20 }}
+        onClick={() => setTopDown(v => !v)}
+        title="Toggle camera view"
+      >
+        {topDown ? '📐 Top-Down' : '🎮 3rd-Person'}
+      </button>
 
       {/* Game HUD overlay */}
       <GameUI

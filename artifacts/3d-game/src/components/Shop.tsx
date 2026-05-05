@@ -27,13 +27,13 @@ const SHOP_ITEMS: ShopItem[] = [
 const DAILY_BONUS = 200; // coins
 
 export default function Shop() {
-  const { profile, setScreen, addCoins, addGems, spendCoins, spendGems } = useGameStore();
+  const { profile, setScreen, addCoins, addGems, spendCoins, spendGems, claimFreeBundle, freeBundleClaimed } = useGameStore();
 
   function handleBuy(item: ShopItem) {
     let success = false;
     if (item.costType === 'coins') success = spendCoins(item.cost);
     else if (item.costType === 'gems') success = spendGems(item.cost);
-    else success = true; // real money — simulate for demo
+    else success = true;
 
     if (success) {
       if (item.reward.coins) addCoins(item.reward.coins);
@@ -57,15 +57,31 @@ export default function Shop() {
         </div>
       </div>
 
-      {/* Daily bonus */}
-      <div className="daily-bonus-card">
-        <div className="daily-bonus-icon">🎁</div>
-        <div className="daily-bonus-text">
-          <div className="daily-bonus-title">DAILY BONUS</div>
-          <div className="daily-bonus-desc">Claim 200 Coins + 2 Gems free!</div>
+      {/* FREE TEST BUNDLE — one-time claim */}
+      <div className={`free-bundle-card ${freeBundleClaimed ? 'bundle-claimed' : ''}`}>
+        <div className="free-bundle-icon">🎮</div>
+        <div className="free-bundle-text">
+          <div className="free-bundle-title">🆓 FREE STARTER BUNDLE</div>
+          <div className="free-bundle-desc">2,000 Coins + 100 Gems — One-time claim for testing!</div>
         </div>
-        <button className="daily-bonus-btn" onClick={handleDailyBonus}>
-          CLAIM
+        <button
+          className={`free-bundle-btn ${freeBundleClaimed ? 'disabled' : ''}`}
+          onClick={() => !freeBundleClaimed && claimFreeBundle()}
+          disabled={freeBundleClaimed}
+        >
+          {freeBundleClaimed ? '✓ CLAIMED' : '🎁 CLAIM FREE'}
+        </button>
+      </div>
+
+      {/* Daily bonus */}
+      <div className="daily-bonus-card" onClick={() => setScreen('daily-rewards')} style={{ cursor: 'pointer' }}>
+        <div className="daily-bonus-icon">📅</div>
+        <div className="daily-bonus-text">
+          <div className="daily-bonus-title">DAILY REWARDS</div>
+          <div className="daily-bonus-desc">7-day calendar with Traits up to Mythic!</div>
+        </div>
+        <button className="daily-bonus-btn" onClick={(e) => { e.stopPropagation(); setScreen('daily-rewards'); }}>
+          OPEN →
         </button>
       </div>
 

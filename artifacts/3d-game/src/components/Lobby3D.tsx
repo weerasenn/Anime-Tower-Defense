@@ -129,20 +129,32 @@ function LobbyFloor() {
 }
 
 // ================================================================
-// Ceiling with neon
+// Ceiling — open-top with high neon strips only (no blocking mesh)
 // ================================================================
 function LobbyCeiling() {
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 7.5, 0]}>
-        <planeGeometry args={[HALL_W + 2, HALL_D + 2]} />
-        <meshStandardMaterial color="#060a12" roughness={1} />
+      {/* ← Solid ceiling REMOVED to fix vision-blocking near NPCs */}
+      {/* Neon strips at high altitude (y=13) — purely decorative */}
+      <mesh position={[0, 13, 0]}>
+        <boxGeometry args={[1.8, 0.1, HALL_D - 2]} />
+        <meshStandardMaterial color="#3B82F6" emissive="#3B82F6" emissiveIntensity={3.0} />
       </mesh>
-      {/* Ceiling neon center strip */}
-      <mesh position={[0, 7.4, 0]}>
-        <boxGeometry args={[1.5, 0.08, HALL_D - 4]} />
-        <meshStandardMaterial color="#3B82F6" emissive="#3B82F6" emissiveIntensity={2.0} />
+      <mesh position={[-7, 12.5, 0]}>
+        <boxGeometry args={[0.07, 0.07, HALL_D - 4]} />
+        <meshStandardMaterial color="#7C3AED" emissive="#7C3AED" emissiveIntensity={3.5} />
       </mesh>
+      <mesh position={[7, 12.5, 0]}>
+        <boxGeometry args={[0.07, 0.07, HALL_D - 4]} />
+        <meshStandardMaterial color="#7C3AED" emissive="#7C3AED" emissiveIntensity={3.5} />
+      </mesh>
+      {/* Cross beams — decorative, very high up */}
+      {[-12, -4, 4, 12].map((z, i) => (
+        <mesh key={i} position={[0, 12.8, z]}>
+          <boxGeometry args={[HALL_W - 4, 0.06, 0.06]} />
+          <meshStandardMaterial color="#A855F7" emissive="#A855F7" emissiveIntensity={2.0} />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -790,6 +802,71 @@ function RaidNPC() {
 }
 
 // ================================================================
+// Basketball — orbits player when moving, floats at shoulder idle
+// (LeBron physics from reference — lerp-based ball follow)
+// ================================================================
+function PlayerBall({ playerRef }: { playerRef: React.RefObject<THREE.Group> }) {
+  const ballRef = useRef<THREE.Mesh>(null!);
+  const ballTarget = useRef(new THREE.Vector3(5, 1.5, 0));
+  const prevPos = useRef(new THREE.Vector3());
+  const linesRef = useRef<THREE.Mesh>(null!);
+
+  useFrame((state) => {
+    if (!playerRef.current || !ballRef.current) return;
+    const pp = playerRef.current.position;
+    const t = state.clock.elapsedTime;
+
+    const dx = pp.x - prevPos.current.x;
+    const dz = pp.z - prevPos.current.z;
+    const moving = Math.abs(dx) > 0.003 || Math.abs(dz) > 0.003;
+    prevPos.current.set(pp.x, pp.y, pp.z);
+
+    if (moving) {
+      // Orbit mode — ball bounces and orbits player
+      ballTarget.current.set(
+        pp.x + Math.sin(t * 6) * 1.1,
+        0.35 + Math.abs(Math.sin(t * 12)) * 0.85,
+        pp.z + Math.cos(t * 6) * 1.1
+      );
+    } else {
+      // Idle — float near right shoulder
+      ballTarget.current.set(
+        pp.x + 0.65,
+        1.45 + Math.sin(t * 2.5) * 0.12,
+        pp.z - 0.1
+      );
+    }
+    ballRef.current.position.lerp(ballTarget.current, 0.12);
+    ballRef.current.rotation.y += 0.08;
+    ballRef.current.rotation.z += 0.03;
+
+    if (linesRef.current) {
+      linesRef.current.rotation.y = t * 1.5;
+    }
+  });
+
+  return (
+    <group>
+      <mesh ref={ballRef} castShadow>
+        <sphereGeometry args={[0.19, 16, 16]} />
+        <meshStandardMaterial
+          color="#EE6730"
+          roughness={0.55}
+          metalness={0.1}
+          emissive="#AA3310"
+          emissiveIntensity={0.4}
+        />
+      </mesh>
+      {/* Ball seam lines */}
+      <mesh ref={linesRef} position={[0, 0, 0]}>
+        <torusGeometry args={[0.19, 0.008, 6, 20]} />
+        <meshStandardMaterial color="#1a0a00" roughness={0.9} />
+      </mesh>
+    </group>
+  );
+}
+
+// ================================================================
 // LeBron James Player Character — tall, Lakers colors, walking anim
 // ================================================================
 function PlayerMesh({ playerRef }: { playerRef: React.RefObject<THREE.Group> }) {
@@ -797,6 +874,7 @@ function PlayerMesh({ playerRef }: { playerRef: React.RefObject<THREE.Group> }) 
   const rightLegRef = useRef<THREE.Group>(null!);
   const leftArmRef = useRef<THREE.Group>(null!);
   const rightArmRef = useRef<THREE.Group>(null!);
+  const hipsRef = useRef<THREE.Group>(null!);
   const prevPos = useRef(new THREE.Vector3());
 
   useFrame((state) => {
@@ -807,14 +885,22 @@ function PlayerMesh({ playerRef }: { playerRef: React.RefObject<THREE.Group> }) 
     const moving = Math.abs(dx) > 0.001 || Math.abs(dz) > 0.001;
     prevPos.current.copy(pp);
 
-    const t = state.clock.elapsedTime * 7;
-    const swing = moving ? Math.sin(t) * 0.45 : 0;
-    const armSwing = moving ? Math.sin(t) * 0.3 : 0;
+    const t = state.clock.elapsedTime;
+    // Faster leg swing frequency when moving (matching reference HTML)
+    const freq = 16;
+    const swing = moving ? Math.sin(t * freq) * 0.8 : 0;
+    const armSwing = moving ? Math.sin(t * freq) * 0.45 : Math.sin(t * 1.5) * 0.05;
 
     if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
     if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
     if (leftArmRef.current) leftArmRef.current.rotation.x = -armSwing;
     if (rightArmRef.current) rightArmRef.current.rotation.x = armSwing;
+    // Hip bob when moving (reference HTML: hips.position.y = 12 + abs(sin)*0.6)
+    if (hipsRef.current) {
+      hipsRef.current.position.y = moving
+        ? Math.abs(Math.sin(t * freq)) * 0.08
+        : Math.sin(t * 2) * 0.02;
+    }
   });
 
   return (
@@ -1041,20 +1127,27 @@ function EnvDecor() {
 }
 
 // ================================================================
-// Lighting
+// Lighting — NEON BRIGHT (2–3× previous intensities)
 // ================================================================
 function LobbyLighting() {
   return (
     <>
-      <ambientLight intensity={1.1} color="#d0e0ff" />
-      <directionalLight position={[0, 15, 5]} intensity={2.2} color="#ffffff" castShadow />
-      <pointLight position={[0, 5, -16]} intensity={7.0} color="#7C3AED" distance={18} />
-      <pointLight position={[0, 4, 0]} intensity={4.0} color="#60a5fa" distance={22} />
-      <pointLight position={[-8, 4, -2]} intensity={4.5} color="#F59E0B" distance={14} />
-      <pointLight position={[8, 4, -2]} intensity={4.5} color="#EF4444" distance={14} />
-      <pointLight position={[0, 6, 17]} intensity={3.5} color="#22d3ee" distance={20} />
-      <hemisphereLight args={['#4a6fa5', '#1a2a3a', 1.3]} />
-      <fog attach="fog" args={['#0d1326', 38, 70]} />
+      <ambientLight intensity={2.8} color="#d0eaff" />
+      <directionalLight position={[0, 20, 5]} intensity={5.0} color="#ffffff" castShadow />
+      {/* Main NPC area lights */}
+      <pointLight position={[0, 7, -16]} intensity={20} color="#9333EA" distance={28} />
+      <pointLight position={[0, 6, 0]} intensity={10} color="#60a5fa" distance={35} />
+      <pointLight position={[-8, 6, -2]} intensity={14} color="#F59E0B" distance={22} />
+      <pointLight position={[8, 6, -2]} intensity={14} color="#EF4444" distance={22} />
+      <pointLight position={[0, 7, 17]} intensity={10} color="#22d3ee" distance={28} />
+      {/* Extra fill lights for brighter neon feel */}
+      <pointLight position={[-5, 4, -10]} intensity={8} color="#7C3AED" distance={18} />
+      <pointLight position={[5, 4, -10]} intensity={8} color="#3B82F6" distance={18} />
+      <pointLight position={[-5, 4, 8]} intensity={6} color="#10B981" distance={18} />
+      <pointLight position={[5, 4, 8]} intensity={6} color="#EC4899" distance={18} />
+      <pointLight position={[0, 5, -7]} intensity={7} color="#A855F7" distance={20} />
+      <hemisphereLight args={['#6a90d0', '#1a2a4a', 2.2]} />
+      <fog attach="fog" args={['#0d1326', 45, 80]} />
     </>
   );
 }
@@ -1243,6 +1336,7 @@ function LobbyScene({
       <Plant position={[7.5, 0, -4]} />
 
       <PlayerMesh playerRef={playerRef} />
+      <PlayerBall playerRef={playerRef} />
       <CameraRig playerRef={playerRef} />
       <ProximityDetector playerRef={playerRef} onNearNPC={onNearNPC} />
     </>
@@ -1281,15 +1375,54 @@ function InteractPrompt({
 }
 
 // ================================================================
-// Lobby HUD (player stats overlay)
+// Area Tab Modal
 // ================================================================
-function LobbyHUD() {
-  const { profile, ownedUnits, equippedUnitIds, setScreen } = useGameStore();
+function AreaTabModal({ onClose }: { onClose: () => void }) {
+  const areas = [
+    { id: 'vanguard-hall', name: 'Vanguard Hall', icon: '🏛️', active: true, description: 'Main lobby — summon, evolve, and enter raids.' },
+    { id: 'training-grounds', name: 'Training Grounds', icon: '⚔️', active: false, description: 'Challenge training dummies and level up your squad.' },
+    { id: 'battle-colosseum', name: 'Battle Colosseum', icon: '🏟️', active: false, description: 'Face endless waves in the ancient arena.' },
+    { id: 'spirit-realm', name: 'Spirit Realm', icon: '👻', active: false, description: 'A dimensional rift where secret bosses await.' },
+  ];
+
+  return (
+    <div className="area-modal-overlay" onClick={onClose}>
+      <div className="area-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="area-modal-header">
+          <span>🗺️ AREA MAP</span>
+          <button className="area-modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="area-modal-grid">
+          {areas.map(area => (
+            <div key={area.id} className={`area-card ${area.active ? 'area-card-active' : 'area-card-locked'}`}>
+              <div className="area-card-icon">{area.icon}</div>
+              <div className="area-card-name">{area.name}</div>
+              <div className="area-card-desc">{area.description}</div>
+              {area.active
+                ? <div className="area-here-badge">📍 YOU ARE HERE</div>
+                : <div className="area-coming-soon">🔒 COMING SOON</div>}
+            </div>
+          ))}
+        </div>
+        <div className="area-modal-hint">More areas unlock as you progress through the story</div>
+      </div>
+    </div>
+  );
+}
+
+// ================================================================
+// Lobby HUD (player stats overlay) — with Area/Traits/Daily
+// ================================================================
+function LobbyHUD({ onAreaTab }: { onAreaTab: () => void }) {
+  const { profile, ownedUnits, equippedUnitIds, setScreen, lastDailyRewardClaim, activeTraits } = useGameStore();
   const equippedCount = equippedUnitIds.filter(Boolean).length;
+  const now = Date.now();
+  const canClaimDaily = now - (lastDailyRewardClaim ?? 0) >= 86400000;
 
   return (
     <div className="lobby3d-hud">
       <div className="lobby3d-hud-inner">
+        {/* Profile row */}
         <div className="lobby3d-profile">
           <div className="lobby3d-avatar">⚔️</div>
           <div>
@@ -1297,16 +1430,49 @@ function LobbyHUD() {
             <div className="lobby3d-level">LVL {profile.level}</div>
           </div>
         </div>
+
+        {/* Currencies */}
         <div className="lobby3d-currencies">
           <div className="lobby3d-currency coins">🪙 {profile.coins.toLocaleString()}</div>
           <div className="lobby3d-currency gems">💎 {profile.gems.toLocaleString()}</div>
         </div>
-        <div className="lobby3d-squad">
-          Squad: <span style={{ color: '#3B82F6' }}>{equippedCount}/5</span>
+
+        {/* Squad + traits summary */}
+        <div className="lobby3d-squad-row">
+          <div className="lobby3d-squad">
+            Squad: <span style={{ color: '#3B82F6' }}>{equippedCount}/5</span>
+          </div>
+          {activeTraits.length > 0 && (
+            <div className="lobby3d-traits-active">
+              ✨ {activeTraits.length} trait{activeTraits.length > 1 ? 's' : ''} active
+            </div>
+          )}
         </div>
+
+        {/* Nav buttons — main actions */}
         <div className="lobby3d-nav-btns">
           <button className="lobby3d-nav-btn" onClick={() => setScreen('inventory')}>📦 Units</button>
+          <button className="lobby3d-nav-btn" onClick={() => setScreen('summon')}>🌀 Summon</button>
           <button className="lobby3d-nav-btn" onClick={() => setScreen('shop')}>🏪 Shop</button>
+        </div>
+
+        {/* Secondary actions row */}
+        <div className="lobby3d-nav-btns" style={{ marginTop: 4 }}>
+          <button className="lobby3d-nav-btn traits-btn" onClick={() => setScreen('traits')}>✨ Traits</button>
+          <button
+            className={`lobby3d-nav-btn daily-btn ${canClaimDaily ? 'daily-available' : ''}`}
+            onClick={() => setScreen('daily-rewards')}
+          >
+            📅 Daily{canClaimDaily ? ' 🔔' : ''}
+          </button>
+          <button className="lobby3d-nav-btn area-btn" onClick={onAreaTab}>🗺️ Areas</button>
+        </div>
+
+        {/* Achievements mini */}
+        <div className="lobby3d-bottom-row">
+          <div className="lobby3d-stat">🏆 {profile.highScore.toLocaleString()}</div>
+          <div className="lobby3d-stat">💀 {profile.totalKills?.toLocaleString() ?? 0}</div>
+          <div className="lobby3d-stat">📦 {ownedUnits.length}</div>
         </div>
       </div>
     </div>
@@ -1333,6 +1499,7 @@ export default function Lobby3D() {
   const joystickRef = useRef<JoystickOutput>({ x: 0, y: 0 });
   const keysRef = useRef<Set<string>>(new Set());
   const [nearNPC, setNearNPC] = useState<NearNPC>({ type: null });
+  const [showAreaTab, setShowAreaTab] = useState(false);
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
   // Keyboard events
@@ -1340,6 +1507,8 @@ export default function Lobby3D() {
     const down = (e: KeyboardEvent) => {
       keysRef.current.add(e.code);
       if (e.code === 'KeyE' && nearNPC.type) handleInteract();
+      if (e.code === 'KeyM') setShowAreaTab(v => !v);
+      if (e.code === 'Escape') setShowAreaTab(false);
     };
     const up = (e: KeyboardEvent) => keysRef.current.delete(e.code);
     window.addEventListener('keydown', down);
@@ -1377,8 +1546,9 @@ export default function Lobby3D() {
       </Canvas>
 
       {/* HTML Overlays */}
-      <LobbyHUD />
+      <LobbyHUD onAreaTab={() => setShowAreaTab(true)} />
       <InteractPrompt nearNPC={nearNPC} onInteract={handleInteract} />
+      {showAreaTab && <AreaTabModal onClose={() => setShowAreaTab(false)} />}
       <ControlsHint isMobile={isMobile} />
 
       {/* Mobile joystick */}

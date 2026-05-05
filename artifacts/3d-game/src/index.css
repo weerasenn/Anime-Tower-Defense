@@ -1963,3 +1963,744 @@ body {
   cursor: pointer; letter-spacing: 1px; transition: all 0.15s;
 }
 .gameover-quit-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ================================================================
+   FREE BUNDLE CARD
+   ================================================================ */
+.free-bundle-card {
+  display: flex; align-items: center; gap: 16px;
+  background: linear-gradient(135deg, #0f2a0f 0%, #1a3a1a 50%, #0a1f2a 100%);
+  border: 2px solid #22c55e; border-radius: 16px;
+  padding: 16px 20px; margin: 0 0 16px 0;
+  position: relative; overflow: hidden;
+  box-shadow: 0 0 24px #22c55e44, inset 0 1px 0 #22c55e22;
+  transition: all 0.2s;
+}
+.free-bundle-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, #22c55e10, transparent);
+  animation: bundleShimmer 2.5s infinite;
+}
+.free-bundle-card.bundle-claimed { border-color: #374151; opacity: 0.65; box-shadow: none; }
+.free-bundle-card.bundle-claimed::before { display: none; }
+@keyframes bundleShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.free-bundle-icon { font-size: 36px; flex-shrink: 0; }
+.free-bundle-text { flex: 1; }
+.free-bundle-title {
+  font-family: var(--font-title); font-size: 14px; font-weight: 700;
+  color: #22c55e; letter-spacing: 1px; margin-bottom: 4px;
+}
+.free-bundle-desc { font-size: 12px; color: var(--text2); }
+.free-bundle-btn {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  border: none; color: #fff; padding: 10px 20px; border-radius: 10px;
+  font-family: var(--font-title); font-size: 12px; font-weight: 700;
+  cursor: pointer; letter-spacing: 1px; white-space: nowrap;
+  transition: transform 0.15s, filter 0.15s;
+  flex-shrink: 0;
+}
+.free-bundle-btn:hover:not(.disabled) { transform: scale(1.06); filter: brightness(1.15); }
+.free-bundle-btn.disabled { background: var(--surface2); color: var(--text3); cursor: default; }
+
+/* ================================================================
+   AREA MAP MODAL
+   ================================================================ */
+.area-modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.area-modal {
+  background: var(--surface1); border: 1px solid var(--border2);
+  border-radius: 20px; width: 100%; max-width: 560px;
+  max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 0 48px #7C3AED33, 0 20px 60px #00000099;
+  padding: 24px;
+}
+.area-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+  font-family: var(--font-title); font-size: 18px; font-weight: 700;
+  color: var(--text); letter-spacing: 1px;
+}
+.area-modal-close {
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text2); width: 32px; height: 32px; border-radius: 8px;
+  cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.area-modal-close:hover { border-color: var(--danger); color: var(--danger); }
+.area-modal-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 16px;
+}
+@media (max-width: 480px) { .area-modal-grid { grid-template-columns: 1fr; } }
+.area-card {
+  border-radius: 14px; padding: 16px;
+  border: 2px solid transparent; transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.area-card-active {
+  background: linear-gradient(135deg, #1a0a2e, #0d1f40);
+  border-color: #7C3AED;
+  box-shadow: 0 0 18px #7C3AED44;
+}
+.area-card-locked {
+  background: var(--surface2); border-color: var(--border1); opacity: 0.6;
+}
+.area-card-icon { font-size: 32px; margin-bottom: 8px; }
+.area-card-name {
+  font-family: var(--font-title); font-size: 13px; font-weight: 700;
+  color: var(--text); margin-bottom: 6px;
+}
+.area-card-desc { font-size: 11px; color: var(--text2); line-height: 1.5; margin-bottom: 8px; }
+.area-here-badge {
+  font-size: 10px; font-weight: 700; color: #7C3AED;
+  background: #7C3AED1a; border: 1px solid #7C3AED44;
+  border-radius: 6px; padding: 3px 8px; display: inline-block;
+}
+.area-coming-soon {
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  background: var(--surface1); border: 1px solid var(--border1);
+  border-radius: 6px; padding: 3px 8px; display: inline-block;
+}
+.area-modal-hint {
+  text-align: center; font-size: 11px; color: var(--text3);
+  border-top: 1px solid var(--border1); padding-top: 14px;
+}
+
+/* ================================================================
+   TRAITS SYSTEM
+   ================================================================ */
+.traits-screen {
+  min-height: 100vh; background: var(--bg); color: var(--text);
+  display: flex; flex-direction: column; padding: 0;
+  font-family: var(--font-body);
+}
+.traits-header {
+  display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+  background: var(--surface1); border-bottom: 1px solid var(--border2);
+  position: sticky; top: 0; z-index: 10;
+}
+.traits-header h2 { flex: 1; margin: 0; font-size: 18px; }
+.traits-body { flex: 1; padding: 16px 20px; overflow-y: auto; }
+.traits-active-slots {
+  background: var(--surface1); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 16px; margin-bottom: 20px;
+}
+.traits-active-title {
+  font-family: var(--font-title); font-size: 12px; font-weight: 700;
+  color: var(--text2); letter-spacing: 1px; margin-bottom: 12px;
+}
+.traits-slot-row { display: flex; gap: 10px; }
+.trait-slot {
+  flex: 1; min-height: 56px; border-radius: 12px;
+  border: 2px dashed var(--border2); background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 8px; position: relative;
+  transition: all 0.2s;
+}
+.trait-slot.filled {
+  border-style: solid; border-color: var(--neon);
+  background: #7C3AED18;
+}
+.trait-slot-icon { font-size: 22px; }
+.trait-slot-name {
+  font-size: 11px; font-weight: 700; color: var(--text);
+  line-height: 1.2;
+}
+.trait-slot-remove {
+  position: absolute; top: 4px; right: 4px;
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 12px; padding: 2px;
+}
+.trait-slot-remove:hover { color: var(--danger); }
+.trait-slot-empty { font-size: 11px; color: var(--text3); text-align: center; }
+
+.traits-filters {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.trait-filter-btn {
+  padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  cursor: pointer; border: 1px solid var(--border2);
+  background: var(--surface2); color: var(--text2);
+  letter-spacing: 0.5px; transition: all 0.15s;
+}
+.trait-filter-btn.active, .trait-filter-btn:hover { background: var(--neon); color: #fff; border-color: var(--neon); }
+
+.traits-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.trait-card {
+  border-radius: 14px; padding: 14px;
+  border: 2px solid var(--border2); background: var(--surface1);
+  transition: all 0.2s; cursor: pointer;
+  position: relative; overflow: hidden;
+}
+.trait-card:hover { transform: translateY(-2px); }
+.trait-card.owned { border-color: currentColor; background: color-mix(in srgb, currentColor 8%, var(--surface1)); }
+.trait-card.equipped { box-shadow: 0 0 12px currentColor; }
+.trait-card.secret-trait { border-color: #fff !important; }
+.trait-card-icon { font-size: 28px; margin-bottom: 8px; }
+.trait-card-rarity {
+  font-size: 9px; font-weight: 900; letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 4px;
+  /* Animated rarity name */
+}
+.trait-card-rarity.rarity-anim {
+  animation: rarityShine 2s infinite alternate;
+}
+@keyframes rarityShine {
+  from { filter: brightness(1); text-shadow: 0 0 6px currentColor; }
+  to { filter: brightness(1.5); text-shadow: 0 0 16px currentColor, 0 0 32px currentColor; }
+}
+.trait-card-name {
+  font-family: var(--font-title); font-size: 12px; font-weight: 700;
+  margin-bottom: 6px; color: var(--text);
+}
+.trait-card-desc { font-size: 10px; color: var(--text2); line-height: 1.45; margin-bottom: 10px; }
+.trait-card-stat {
+  font-family: var(--font-title); font-size: 11px; font-weight: 700;
+  padding: 4px 8px; background: var(--surface2); border-radius: 6px;
+  display: inline-block; margin-bottom: 6px;
+}
+.trait-equip-btn, .trait-unequip-btn {
+  width: 100%; padding: 7px; border-radius: 8px;
+  font-family: var(--font-title); font-size: 10px; font-weight: 700;
+  cursor: pointer; border: none; letter-spacing: 0.5px;
+  transition: all 0.15s;
+}
+.trait-equip-btn { background: var(--neon); color: #fff; }
+.trait-equip-btn:hover { filter: brightness(1.15); transform: scale(1.02); }
+.trait-equip-btn:disabled { background: var(--surface2); color: var(--text3); cursor: not-allowed; transform: none; }
+.trait-unequip-btn { background: #ef444422; color: #ef4444; border: 1px solid #ef444444; }
+.trait-unequip-btn:hover { background: #ef444433; }
+.trait-locked-msg {
+  font-size: 10px; color: var(--text3); text-align: center;
+  padding: 6px; border: 1px dashed var(--border2); border-radius: 8px;
+}
+
+.traits-empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--text2); font-size: 14px;
+}
+.traits-empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+/* Secret trait special styles */
+.secret-shimmer {
+  background: linear-gradient(90deg, #E879F9, #fff, #E879F9, #7C3AED, #E879F9);
+  background-size: 300% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: secretGradient 2s linear infinite;
+}
+@keyframes secretGradient {
+  0% { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
+/* ================================================================
+   DAILY REWARDS SCREEN
+   ================================================================ */
+.daily-rewards-screen {
+  min-height: 100vh; background: var(--bg); color: var(--text);
+  display: flex; flex-direction: column;
+}
+.daily-rewards-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px;
+  background: var(--surface1); border-bottom: 1px solid var(--border2);
+  position: sticky; top: 0; z-index: 10;
+}
+.daily-rewards-header h2 { flex: 1; margin: 0; font-size: 18px; }
+.daily-rewards-body { flex: 1; padding: 16px 20px; overflow-y: auto; }
+.daily-streak-banner {
+  background: linear-gradient(135deg, #1a0a2e, #0d1f40);
+  border: 1px solid #7C3AED44; border-radius: 16px;
+  padding: 16px 20px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 16px;
+}
+.daily-streak-icon { font-size: 36px; }
+.daily-streak-text { flex: 1; }
+.daily-streak-title {
+  font-family: var(--font-title); font-size: 14px; font-weight: 700;
+  color: #F59E0B; margin-bottom: 4px;
+}
+.daily-streak-sub { font-size: 12px; color: var(--text2); }
+.daily-timer { font-size: 12px; color: var(--text3); }
+.daily-calendar {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 8px; margin-bottom: 20px;
+}
+@media (max-width: 480px) { .daily-calendar { grid-template-columns: repeat(4, 1fr); } }
+.daily-day-card {
+  border-radius: 12px; padding: 10px 6px;
+  background: var(--surface1); border: 2px solid var(--border2);
+  text-align: center; transition: all 0.2s; position: relative;
+}
+.daily-day-card.day-claimed { border-color: #22c55e; background: #22c55e14; opacity: 0.7; }
+.daily-day-card.day-today { border-color: #F59E0B; box-shadow: 0 0 14px #F59E0B44; background: #F59E0B14; }
+.daily-day-card.day-locked { opacity: 0.4; }
+.daily-day-num {
+  font-family: var(--font-title); font-size: 10px; font-weight: 700;
+  color: var(--text2); margin-bottom: 6px; text-transform: uppercase;
+}
+.daily-day-icon { font-size: 24px; margin-bottom: 4px; }
+.daily-day-amount { font-size: 10px; color: var(--text3); margin-bottom: 6px; }
+.daily-day-trait {
+  font-size: 9px; font-weight: 700; color: #A855F7;
+  background: #A855F714; border: 1px solid #A855F744;
+  border-radius: 4px; padding: 2px 4px;
+}
+.daily-claimed-check {
+  position: absolute; top: 4px; right: 4px;
+  background: #22c55e; color: #fff; border-radius: 50%;
+  width: 16px; height: 16px; font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.daily-claim-section { text-align: center; margin-bottom: 20px; }
+.daily-claim-btn {
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  border: none; color: #fff;
+  padding: 14px 40px; border-radius: 14px;
+  font-family: var(--font-title); font-size: 16px; font-weight: 700;
+  cursor: pointer; letter-spacing: 2px;
+  transition: transform 0.15s, filter 0.15s;
+  box-shadow: 0 0 24px #F59E0B66;
+}
+.daily-claim-btn:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.1); }
+.daily-claim-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.daily-already-claimed {
+  font-size: 13px; color: var(--text2); margin-top: 8px;
+}
+.daily-reward-result {
+  background: linear-gradient(135deg, #0f2a1a, #1a2a0f);
+  border: 1px solid #22c55e44; border-radius: 14px;
+  padding: 16px 20px; text-align: center;
+}
+.daily-reward-result h3 {
+  font-family: var(--font-title); color: #22c55e;
+  font-size: 14px; font-weight: 700; margin-bottom: 12px;
+}
+.daily-result-coins { font-size: 18px; font-weight: 700; color: #F59E0B; }
+.daily-result-gems { font-size: 18px; font-weight: 700; color: #22d3ee; }
+.daily-result-trait {
+  font-size: 14px; font-weight: 700; color: #A855F7;
+  margin-top: 8px; padding: 8px; background: #A855F714;
+  border-radius: 8px;
+}
+
+/* ================================================================
+   LOBBY HUD UPDATES — extra stats + trait badge
+   ================================================================ */
+.lobby3d-squad-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; margin-bottom: 4px;
+}
+.lobby3d-traits-active {
+  font-size: 10px; font-weight: 700; color: #A855F7;
+  background: #A855F714; border: 1px solid #A855F744;
+  border-radius: 6px; padding: 2px 8px;
+}
+.lobby3d-bottom-row {
+  display: flex; gap: 8px; margin-top: 6px;
+  border-top: 1px solid var(--border1); padding-top: 6px;
+}
+.lobby3d-stat {
+  font-size: 10px; color: var(--text2);
+  background: var(--surface2); border-radius: 6px;
+  padding: 2px 8px; flex: 1; text-align: center;
+}
+.lobby3d-nav-btns .traits-btn { border-color: #A855F744; color: #A855F7; }
+.lobby3d-nav-btns .traits-btn:hover { background: #A855F722; }
+.lobby3d-nav-btns .daily-btn { border-color: #F59E0B44; color: #F59E0B; }
+.lobby3d-nav-btns .daily-btn:hover { background: #F59E0B22; }
+.lobby3d-nav-btns .daily-btn.daily-available { 
+  border-color: #F59E0B; box-shadow: 0 0 8px #F59E0B44;
+  animation: dailyPulse 1.8s infinite;
+}
+.lobby3d-nav-btns .area-btn { border-color: #22d3ee44; color: #22d3ee; }
+.lobby3d-nav-btns .area-btn:hover { background: #22d3ee22; }
+@keyframes dailyPulse {
+  0%, 100% { box-shadow: 0 0 6px #F59E0B66; }
+  50% { box-shadow: 0 0 14px #F59E0Bcc; }
+}
+
+/* ================================================================
+   CONTROLS HINT UPDATE — add M for map
+   ================================================================ */
+.controls-hint {
+  font-size: 11px !important;
+}
+
+/* ================================================================
+   DIVINE RARITY STYLES
+   ================================================================ */
+.rarity-divine {
+  background: linear-gradient(90deg, #FFD700, #fff, #FFD700, #FFA500, #FFD700);
+  background-size: 300% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: divineGlow 1.8s linear infinite;
+  font-weight: 900 !important;
+}
+@keyframes divineGlow {
+  0% { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+.divine-card-aura {
+  box-shadow: 0 0 24px #FFD70066, 0 0 48px #FFD70033 !important;
+  border-color: #FFD700 !important;
+}
+
+/* ================================================================
+   TOP-DOWN / 3RD PERSON TOGGLE (GameView)
+   ================================================================ */
+.camera-toggle-btn {
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); padding: 7px 14px; border-radius: 8px;
+  font-family: var(--font-title); font-size: 11px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.5px;
+  transition: all 0.15s;
+}
+.camera-toggle-btn:hover { border-color: #60a5fa; color: #60a5fa; }
+.camera-toggle-btn.top-down { border-color: #A855F7; color: #A855F7; background: #A855F714; }
+
+/* ================================================================
+   QOL — Rarity names in reveal / inventory shine
+   ================================================================ */
+.rarity-name-rare { color: #3B82F6; text-shadow: 0 0 8px #3B82F666; }
+.rarity-name-epic { color: #A855F7; text-shadow: 0 0 8px #A855F766; }
+.rarity-name-legendary { color: #F59E0B; text-shadow: 0 0 8px #F59E0B66; }
+.rarity-name-mythic {
+  color: #EF4444; text-shadow: 0 0 12px #EF444488;
+  animation: mythicFlicker 2s ease-in-out infinite;
+}
+.rarity-name-secret {
+  background: linear-gradient(90deg, #E879F9, #fff, #E879F9);
+  background-size: 300% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: secretGradient 2s linear infinite;
+}
+.rarity-name-divine {
+  background: linear-gradient(90deg, #FFD700, #fff, #FFD700);
+  background-size: 300% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: divineGlow 1.5s linear infinite;
+  font-weight: 900 !important;
+}
+@keyframes mythicFlicker {
+  0%, 100% { text-shadow: 0 0 8px #EF444488; }
+  50% { text-shadow: 0 0 20px #EF4444cc, 0 0 40px #EF444466; }
+}
+
+/* ================================================================
+   MISC QOL — smooth scroll, better focus rings, etc.
+   ================================================================ */
+* { scroll-behavior: smooth; }
+button:focus-visible { outline: 2px solid var(--neon); outline-offset: 2px; }
+.section-title { font-size: clamp(14px, 2.5vw, 18px); }
+
+/* ================================================================
+   TRAITS SCREEN — full styles
+   ================================================================ */
+.traits-owned-count {
+  font-size: 11px; color: var(--text2); background: var(--surface2);
+  border: 1px solid var(--border1); border-radius: 8px; padding: 3px 10px;
+}
+
+/* Active traits panel */
+.active-traits-panel {
+  background: linear-gradient(135deg, #0f0a2e, #1a0d40);
+  border: 1px solid #7C3AED44; border-radius: 16px;
+  padding: 16px 20px; margin: 0 16px 16px;
+}
+.active-traits-title {
+  font-family: var(--font-title); font-size: 10px; font-weight: 700;
+  color: #7C3AED; letter-spacing: 2px; margin-bottom: 12px;
+}
+.active-traits-slots { display: flex; gap: 8px; margin-bottom: 8px; }
+.active-traits-hint { font-size: 10px; color: var(--text3); text-align: center; }
+.active-slot {
+  flex: 1; border-radius: 12px; border: 2px dashed var(--border2);
+  background: var(--surface2); min-height: 54px;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 4px; padding: 6px; position: relative;
+  transition: all 0.2s;
+}
+.active-slot-filled {
+  border-style: solid; border-color: #7C3AED;
+  background: #7C3AED18;
+}
+.active-slot-icon { font-size: 20px; }
+.active-slot-name { font-size: 9px; font-weight: 700; color: var(--text); text-align: center; line-height: 1.2; }
+.active-slot-remove {
+  position: absolute; top: 3px; right: 3px;
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 10px; padding: 2px;
+}
+.active-slot-remove:hover { color: var(--danger); }
+.active-slot-placeholder { font-size: 10px; color: var(--text3); text-align: center; }
+
+/* Trait filters bar */
+.traits-filters {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 0 16px 12px; overflow-x: auto;
+}
+.trait-filter-btn {
+  padding: 5px 14px; border-radius: 20px; font-size: 10px; font-weight: 700;
+  cursor: pointer; border: 1px solid var(--border2);
+  background: var(--surface2); color: var(--text2);
+  letter-spacing: 0.5px; transition: all 0.15s; white-space: nowrap;
+  flex-shrink: 0;
+}
+.trait-filter-btn.active { background: var(--neon); color: #fff; border-color: var(--neon); }
+
+/* Trait list */
+.traits-list {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 0 16px 80px;
+}
+.traits-empty {
+  text-align: center; padding: 48px 20px; color: var(--text2);
+}
+.traits-empty-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.5; }
+
+/* Individual trait card */
+.trait-card {
+  border-radius: 14px; padding: 14px;
+  background: var(--surface1); border: 2px solid var(--border2);
+  transition: all 0.2s; cursor: pointer;
+  position: relative;
+}
+.trait-card:hover { transform: translateX(4px); }
+.trait-owned { border-left-width: 4px; }
+.trait-active { box-shadow: 0 0 14px currentColor; }
+.trait-locked { opacity: 0.6; }
+
+.trait-card-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+}
+.trait-icon-large { font-size: 28px; flex-shrink: 0; }
+.trait-card-info { flex: 1; }
+.trait-card-name { font-family: var(--font-title); font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.trait-rarity-badge {
+  display: inline-block; font-size: 9px; font-weight: 900;
+  letter-spacing: 1.5px; padding: 2px 8px; border-radius: 4px;
+  border: 1px solid currentColor; background: color-mix(in srgb, currentColor 12%, transparent);
+}
+.trait-equipped-badge {
+  background: #22c55e22; border: 1px solid #22c55e66; color: #22c55e;
+  font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+}
+.trait-locked-badge {
+  background: var(--surface2); border: 1px solid var(--border1); color: var(--text3);
+  font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+}
+.trait-effect { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.trait-effect-label { font-weight: 700; color: var(--text); }
+
+.trait-details-expanded {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border1);
+}
+.trait-description { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+.trait-lore {
+  font-size: 11px; color: var(--text3); font-style: italic;
+  border-left: 2px solid var(--border2); padding-left: 8px; margin-bottom: 8px;
+}
+.trait-obtain { font-size: 10px; color: var(--text3); margin-bottom: 10px; }
+
+/* Trait rarity color overrides (left border per rarity) */
+.trait-border-common { border-left-color: #9CA3AF !important; }
+.trait-border-uncommon { border-left-color: #22c55e !important; }
+.trait-border-rare { border-left-color: #3B82F6 !important; }
+.trait-border-epic { border-left-color: #A855F7 !important; }
+.trait-border-legendary { border-left-color: #F59E0B !important; }
+.trait-border-mythic { border-left-color: #EF4444 !important; }
+.trait-border-secret { border-left-color: #E879F9 !important; }
+
+/* Rarity-colored animated trait names */
+.trait-name-text { display: inline; font-weight: 700; }
+.trait-rarity-common { color: #9CA3AF; }
+.trait-rarity-uncommon { color: #22c55e; }
+.trait-rarity-rare { color: #3B82F6; text-shadow: 0 0 6px #3B82F666; }
+.trait-rarity-epic { color: #A855F7; text-shadow: 0 0 8px #A855F766; }
+.trait-rarity-legendary {
+  color: #F59E0B;
+  animation: legendaryPulse 2s ease-in-out infinite;
+}
+.trait-rarity-mythic {
+  background: linear-gradient(90deg, #EF4444, #FF6B6B, #EF4444);
+  background-size: 300% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: mythicSlide 1.5s linear infinite;
+}
+.trait-rarity-secret {
+  background: linear-gradient(90deg, #E879F9, #fff, #E879F9, #A855F7);
+  background-size: 300% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: secretGradient 1.8s linear infinite;
+  font-weight: 900 !important;
+  filter: drop-shadow(0 0 8px #E879F9);
+}
+@keyframes legendaryPulse {
+  0%, 100% { text-shadow: 0 0 6px #F59E0B88; }
+  50% { text-shadow: 0 0 18px #F59E0Bcc, 0 0 36px #F59E0B66; }
+}
+@keyframes mythicSlide {
+  0% { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
+/* Traits "how to get" section */
+.traits-how-to {
+  margin: 8px 16px 24px;
+  background: var(--surface1); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 16px;
+}
+.htp-title {
+  font-family: var(--font-title); font-size: 10px; font-weight: 700;
+  color: var(--text2); letter-spacing: 2px; margin-bottom: 12px;
+}
+.traits-obtain-list { display: flex; flex-direction: column; gap: 10px; }
+.obtain-item { display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--text2); }
+.obtain-icon { font-size: 18px; flex-shrink: 0; }
+
+/* ================================================================
+   DAILY REWARDS SCREEN — full styles
+   ================================================================ */
+.daily-screen {
+  min-height: 100vh; background: var(--bg); color: var(--text);
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.daily-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; background: var(--surface1);
+  border-bottom: 1px solid var(--border2);
+  position: sticky; top: 0; z-index: 10;
+}
+.daily-header h2 { flex: 1; margin: 0; font-size: 16px; }
+.daily-streak { display: flex; align-items: center; gap: 4px; }
+.streak-icon { font-size: 18px; }
+.streak-count { font-family: var(--font-title); font-size: 12px; font-weight: 700; color: #F59E0B; }
+
+/* Claim flash */
+.claim-flash {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7); z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  animation: flashIn 0.3s ease;
+  pointer-events: none;
+}
+@keyframes flashIn { from { opacity: 0; } to { opacity: 1; } }
+.claim-flash-inner {
+  background: linear-gradient(135deg, #0f2a14, #1a3a1a);
+  border: 2px solid #22c55e; border-radius: 20px;
+  padding: 32px; text-align: center;
+  box-shadow: 0 0 40px #22c55e66;
+}
+.claim-flash-title {
+  font-family: var(--font-title); font-size: 18px; font-weight: 700;
+  color: #22c55e; margin-bottom: 16px;
+}
+.claim-flash-rewards { display: flex; flex-direction: column; gap: 8px; }
+.claim-reward-item { font-size: 16px; font-weight: 700; color: var(--text); }
+
+/* 7-day calendar */
+.daily-calendar {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 8px; padding: 16px;
+}
+@media (max-width: 500px) { .daily-calendar { grid-template-columns: repeat(4, 1fr); } }
+
+.daily-day-card {
+  border-radius: 12px; padding: 10px 6px;
+  background: var(--surface1); border: 2px solid var(--border2);
+  text-align: center; transition: all 0.2s; position: relative;
+}
+.day-past { border-color: #22c55e44; background: #22c55e0a; opacity: 0.7; }
+.day-current {
+  border-color: #F59E0B; background: #F59E0B14;
+  box-shadow: 0 0 16px #F59E0B44;
+  transform: scale(1.04);
+}
+.day-future { opacity: 0.5; }
+.day-grand {
+  border-color: #A855F7;
+  background: linear-gradient(135deg, #1a0a2e, #0d1f40);
+  box-shadow: 0 0 16px #A855F744;
+}
+.day-check {
+  position: absolute; top: 3px; right: 3px;
+  background: #22c55e; color: #fff;
+  width: 14px; height: 14px; border-radius: 50%;
+  font-size: 9px; display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+}
+.day-num {
+  font-family: var(--font-title); font-size: 9px; font-weight: 700;
+  color: var(--text2); margin-bottom: 4px;
+}
+.day-icon { font-size: 20px; margin-bottom: 3px; }
+.day-coins { font-size: 9px; color: #F59E0B; margin-bottom: 1px; }
+.day-gems { font-size: 9px; color: #22d3ee; margin-bottom: 3px; }
+.day-trait {
+  font-size: 8px; font-weight: 700;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  border-radius: 4px; padding: 1px 4px; border: 1px solid currentColor;
+  opacity: 0.9;
+}
+.day-today-badge {
+  position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+  font-size: 7px; font-weight: 900; color: #F59E0B;
+  letter-spacing: 0.5px;
+}
+
+/* Today's reward panel */
+.daily-today {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, #1a1a0f, #2a1a0f);
+  border: 1px solid #F59E0B44; border-radius: 16px;
+  padding: 18px; text-align: center;
+}
+.today-title {
+  font-family: var(--font-title); font-size: 11px; font-weight: 700;
+  color: #F59E0B; letter-spacing: 1.5px; margin-bottom: 12px;
+}
+.today-details { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+.today-reward {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  background: var(--surface1); border-radius: 10px; padding: 6px 14px;
+}
+.today-trait { font-weight: 700; }
+
+.claim-btn {
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  border: none; color: #fff;
+  padding: 14px 48px; border-radius: 14px;
+  font-family: var(--font-title); font-size: 15px; font-weight: 700;
+  cursor: pointer; letter-spacing: 1.5px;
+  box-shadow: 0 0 28px #F59E0B66;
+  transition: transform 0.15s, filter 0.15s;
+}
+.claim-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+.claimed-badge {
+  font-family: var(--font-title); font-size: 14px; font-weight: 700;
+  color: #22c55e; padding: 10px;
+}
+.next-claim-timer { }
+.timer-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+.timer-value {
+  font-family: var(--font-title); font-size: 22px; font-weight: 700;
+  color: var(--text);
+}
+
+.daily-currencies {
+  display: flex; gap: 10px; justify-content: center;
+  padding: 0 16px 24px;
+}
